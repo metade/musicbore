@@ -22,7 +22,30 @@ class ArtistFactFinder < FactFinder
   end
   
   def myspace
-    "#{MO::myspace.bore::label} #{tidy_url(@artist.mo::myspace)}"
+    "has a myspace at #{tidy_url(@artist.mo::myspace)}"
+  end
+  
+  def two_degrees
+    sparql = <<-eos
+      SELECT ?pl ?tl ?p2l ?ol WHERE {
+      <http://dbpedia.org/resource/Fugazi> a <http://dbpedia.org/ontology/Band> ; ?p ?t . 
+      ?t ?p2 ?o .
+      ?p rdfs:label ?pl .
+      ?t rdfs:label ?tl .
+      ?p2 rdfs:label ?p2l .
+      ?o a <http://dbpedia.org/ontology/Band> .
+      ?o <http://dbpedia.org/property/name> ?ol .
+
+      FILTER (
+      (langMatches(lang(?ol), "en") || lang(?ol) = "" ) && 
+      (langMatches(lang(?pl), "en") || lang(?pl) = "" ) &&
+      (langMatches(lang(?tl), "en") || lang(?tl) = "" ) &&
+      (langMatches(lang(?p2l), "en") || lang(?p2l) = "" )
+      )
+      }
+    eos
+    results = $dbpedia.query(sparql)
+    p results
   end
   
   def close_friend_of
