@@ -1,3 +1,19 @@
+class Subject
+  attr_accessor :name
+  
+  def pronoun
+    'it'
+  end
+end
+
+class ArtistSubject < Subject
+  attr_accessor :name
+  
+  def pronoun
+    'he'
+  end
+end
+
 class Fact
   attr_accessor :subject, :verb_phrase, :object, :gender
 
@@ -17,11 +33,11 @@ class Fact
   end
 
   def first_sentence
-    [subject, self.verb_phrase, self.object].join(" ")
+    [subject.name, self.verb_phrase, self.object].join(" ")
   end
 
   def subsequent_sentence
-    [pronoun, self.verb_phrase, self.object].join(" ")
+    [subject.pronoun, self.verb_phrase, self.object].join(" ")
   end
 end
 
