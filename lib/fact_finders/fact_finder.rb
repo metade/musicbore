@@ -1,5 +1,8 @@
 require 'rubygems'
 require 'activesupport'
+$LOAD_PATH << File.join(File.dirname(__FILE__),'..','..','vendor','grammar','lib')
+require File.join(File.dirname(__FILE__),'..','..','vendor','grammar','lib','grammar.rb')
+require File.join(File.dirname(__FILE__),'..','..','vendor','grammar','lib','grammar','ext','string.rb')
 
 class Subject
   attr_accessor :name
@@ -13,7 +16,7 @@ class Subject
   end
   
   def inflect_verb(verb)
-    ActiveSupport::Inflector.pluralize(verb)
+    verb.third_person_singular
   end
 end
 
@@ -35,9 +38,9 @@ class ArtistSubject < Subject
 
   def inflect_verb(verb)
     case gender
-    when "Male" then ActiveSupport::Inflector.pluralize(verb)
-    when "Female" then ActiveSupport::Inflector.pluralize(verb)
-    else verb
+    when "Male" then verb.third_person_singular
+    when "Female" then verb.third_person_singular
+    else verb.third_person_plural
     end
   end
   
