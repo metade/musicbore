@@ -10,7 +10,7 @@ class ArtistFactFinder < FactFinder
     @artist = MO::Artist.new(artist_uri)
     @artist_type = @artist.rdf::type
     
-    @subject = ArtistSubject.new(:name => name, :gender => gender)
+    @subject = ArtistSubject.new(:name => name, :gender => gender, :first_name => first_name)
   end
   
   def resource
@@ -23,7 +23,7 @@ class ArtistFactFinder < FactFinder
   end
   
   def dbpedia_uri
-    @dbpedia_uri ||= [@artist.owl::sameAs].flatten.detect { |u| u.uri =~ /dbpedia/ }
+    @dbpedia_uri ||= [@artist.owl::sameAs].flatten.compact.detect { |u| u.uri =~ /dbpedia/ }
   end
   
   def self.artist_uri_for_dbpedia_uri(dbpedia_uri)
@@ -41,12 +41,17 @@ class ArtistFactFinder < FactFinder
   end
   
   def is_group?
+    return true if @artist_type.nil?
     @artist_type.include?(MO::MusicGroup)
+  end
+  
+  def first_name
+    return nil if is_group?
+    first_name = $1.downcase if name =~ /(\w+) /
   end
   
   def gender
     return nil if is_group?
-    first_name = $1.downcase if name =~ /(\w+) /
     if MALE_NAMES[first_name]
       :male
     elsif FEMALE_NAMES[first_name]
@@ -56,7 +61,7 @@ class ArtistFactFinder < FactFinder
     end
   end
   
-  def list_statements
+  def statements
     [
       myspace,
       formed,
@@ -76,20 +81,22 @@ class ArtistFactFinder < FactFinder
   end
   
   def similar_artists
-     uri = "http://ws.audioscrobbler.com/2.0/artist/#{URI.escape(name)}/similar.txt"
-     similar_artists = []
-     begin
-       open(uri) do |f|
-         f.each_line {|l| similar_artists << l.split(',').last.strip }
-       end
-     rescue => e
-       puts "Error fetching data from last.fm: #{e.message}"
+    return nil if name.nil?
+    uri = "http://ws.audioscrobbler.com/2.0/artist/#{URI.escape(name)}/similar.txt"
+    similar_artists = []
+    begin
+     open(uri) do |f|
+       f.each_line {|l| similar_artists << l.split(',').last.strip }
      end
-     similar_artists.each { |a| a.gsub!('&amp;', '&') }
-     
-     Fact.new(:subject => subject,
-       :verb_phrase => 'sound a bit like',
-       :object => join_sequence(similar_artists[0,rand(3)]) + '.')
+    rescue => e
+     puts "Error fetching data from last.fm: #{e.message}"
+    end
+    similar_artists.each { |a| a.gsub!('&amp;', '&') }
+    return nil if similar_artists.empty?
+
+    Fact.new(:subject => subject,
+     :verb_phrase => 'sound a bit like',
+     :object => join_sequence(similar_artists[0,1+rand(2)]) + '.')
    end
   
   def close_friend_of
@@ -137,10 +144,17 @@ class ArtistFactFinder < FactFinder
     results.each { |r| r.gsub!(/\(.+\)/, '') }
     results.uniq!
     
+    favourive = results.rand
+    phrases = [
+      "My favourte is #{favourive}",
+      "I really liked #{favourive}",
+      "#{favourive} was just terrible.",
+    ]
+    
     return if results.empty?
     Fact.new(:subject => subject,
       :verb_phrase => 'has released',
-      :object => "#{results.size} records. My favourite is #{results[rand(results.size)]}.")
+      :object => "#{results.size} records. #{phrases.rand}.")
   end
   
   def reviews
@@ -161,6 +175,17 @@ class ArtistFactFinder < FactFinder
   end
   
   def formed
+    sparql = <<-eos
+      PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+      PREFIX dc: <http://purl.org/dc/elements/1.1/>
+      PREFIX bio: <http://purl.org/vocab/bio/0.1/>
+      SELECT ?record WHERE {
+        <#{@artist.uri}> foaf:made ?r .
+        ?r dc:title ?record .
+      }
+    eos
+    results = $bbc.query(sparql).flatten
+    
     date = Query.new.select(:formed).
       where(@artist, BIO::event, :birth).
       where(:birth, BIO::date, :formed).execute.first
@@ -172,12 +197,13 @@ class ArtistFactFinder < FactFinder
   end
   
   def join_sequence(array)
+    return nil if array.empty?
     if array.size==1
       array.first
     elsif array.size == 2
       "#{array.first} and #{array.last}"
     else
-      array[0..2].join(", ") + " and " + array[3]
+      array[0..array.size-2].join(", ") + " and " + array[array.size-1]
     end
   end
 end

@@ -4,6 +4,12 @@ $LOAD_PATH << File.join(File.dirname(__FILE__),'..','..','vendor','grammar','lib
 require File.join(File.dirname(__FILE__),'..','..','vendor','grammar','lib','grammar.rb')
 require File.join(File.dirname(__FILE__),'..','..','vendor','grammar','lib','grammar','ext','string.rb')
 
+class Array
+  def rand
+    self[Kernel.rand(self.size)]
+  end
+end
+
 class Subject
   attr_accessor :name
   
@@ -21,11 +27,12 @@ class Subject
 end
 
 class ArtistSubject < Subject
-  attr_accessor :name, :gender
+  attr_accessor :name, :gender, :first_name
   
   def initialize(options = {})
     @name = options[:name]
     @gender = options[:gender]
+    @first_name = options[:first_name]
   end
   
   def pronoun
@@ -66,7 +73,9 @@ class Fact
   end
 
   def subsequent_sentence
-    [subject.pronoun, inflected_verb_phrase, object].join(" ")
+    return first_sentence if rand>0.8
+    pronoun = (subject.first_name and rand > 0.8) ? subject.first_name : subject.pronoun 
+    [pronoun, inflected_verb_phrase, object].join(" ")
   end
   
   def final_sentence
@@ -86,19 +95,15 @@ class FactFinder
   end
   
   def statements
-    facts = list_statements
-    [facts.pop.first_sentence,
-     facts[0..facts.size-1].map {|f| f.subsequent_sentence},
-     facts.last.final_sentence
-    ].flatten
   end
   
   def bla_bla_bla
-    facts = list_statements.sort { |a,b| rand(3)-1 }
+    facts = statements.sort { |a,b| rand(3)-1 }
+    return nil if facts.empty?
     string = facts.pop.first_sentence + ' '
     facts.each do |fact|
+      break if (string.size > 200)
       string += fact.subsequent_sentence + ' '
-      break if string.size > 200
     end
     string
   end
