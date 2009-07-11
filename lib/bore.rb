@@ -53,7 +53,11 @@ class Bore
     if topic =~ %r[http://www.bbc.co.uk/music/artists]
       ArtistFactFinder.new(topic)
     else
-      dbpedia_uri = "http://dbpedia.org/resource/#{topic.gsub(' ', '_')}"
+      if topic =~ %r[http://dbpedia.org/resource/]
+        dbpedia_uri = topic
+      else 
+        dbpedia_uri = "http://dbpedia.org/resource/#{topic.gsub(' ', '_')}"
+      end
       artist_uri = ArtistFactFinder.artist_uri_for_dbpedia_uri(dbpedia_uri)
       if artist_uri
         ArtistFactFinder.new(artist_uri) 
@@ -72,6 +76,9 @@ if __FILE__ == $0
   # p bore.bore('http://www.bbc.co.uk/music/artists/5fee3020-513b-48c2-b1f7-4681b01db0c6#artist')
   # p bore.bore('http://www.bbc.co.uk/music/artists/f27ec8db-af05-4f36-916e-3d57f91ecf5e#artist')
   finder = bore.bore('Michael Jackson')
+  finder = bore.bore('http://dbpedia.org/resource/Barry_White')
   finder.statements.each { |s| puts s }
+  puts '---'
+  puts finder.bla_bla_bla
 end
 

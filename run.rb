@@ -54,9 +54,7 @@ IRCEvent.add_callback('privmsg') do |event|
     begin
       fact_finder = bore.bore($1)
       bot.send_message(event.channel, fact_finder.resource)
-      fact_finder.statements.each do |statement|
-        bot.send_message(event.channel, "say:#{statement}")
-      end
+      bot.send_message(event.channel, "say:#{fact_finder.bla_bla_bla}")
       bot.send_message(event.channel, "connectionfinder:#{fact_finder.dbpedia_uri.uri}") #if event.from == 'relationshipfinder'
     rescue => e
       bot.send_message(event.channel, "doh! #{e.message}")
