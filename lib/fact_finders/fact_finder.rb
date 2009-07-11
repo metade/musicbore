@@ -37,11 +37,11 @@ class Fact
   end
 
   def first_sentence
-    [subject, self.verb_phrase, self.object].join(" ")
+    [subject.name, self.verb_phrase, self.object].join(" ")
   end
 
   def subsequent_sentence
-    [subject, self.verb_phrase, self.object].join(" ")
+    [subject.pronoun, self.verb_phrase, self.object].join(" ")
   end
 end
 
