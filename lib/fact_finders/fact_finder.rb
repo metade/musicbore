@@ -74,7 +74,7 @@ class Fact
 
   def subsequent_sentence
     return first_sentence if rand>0.8
-    pronoun = (subject.first_name and rand > 0.8) ? subject.first_name : subject.pronoun 
+    pronoun = (subject.first_name and rand > 0.5) ? subject.first_name.titleize : subject.pronoun 
     [pronoun, inflected_verb_phrase, object].join(" ")
   end
   
@@ -98,12 +98,13 @@ class FactFinder
   end
   
   def bla_bla_bla
-    facts = statements.sort { |a,b| rand(3)-1 }
-    return nil if facts.empty?
-    string = facts.pop.first_sentence + ' '
+    list = statements
+    return if (list.nil? or list.empty?)
+    facts = list.sort { |a,b| rand(3)-1 }
+    string = facts.pop.first_sentence + '. '
     facts.each do |fact|
       break if (string.size > 200)
-      string += fact.subsequent_sentence + ' '
+      string += fact.subsequent_sentence + '. '
     end
     string
   end

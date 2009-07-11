@@ -65,6 +65,7 @@ class ArtistFactFinder < FactFinder
     [
       myspace,
       formed,
+      spouse_of,
       close_friend_of,
       similar_artists,
       reviews,
@@ -77,7 +78,7 @@ class ArtistFactFinder < FactFinder
     return nil if url.nil?
     Fact.new(:subject => subject,
       :verb_phrase => 'has a myspace at',
-      :object => tidy_url(url) + '.')
+      :object => tidy_url(url))
   end
   
   def similar_artists
@@ -96,8 +97,20 @@ class ArtistFactFinder < FactFinder
 
     Fact.new(:subject => subject,
      :verb_phrase => 'sound a bit like',
-     :object => join_sequence(similar_artists[0,1+rand(2)]) + '.')
+     :object => join_sequence(similar_artists[0,1+rand(2)]))
    end
+  
+  def spouse_of
+    sparql = 
+      "PREFIX rel: <http://purl.org/vocab/relationship/> " +
+      "PREFIX foaf: <http://xmlns.com/foaf/0.1/> " + 
+      "SELECT ?name WHERE { <#{@artist.uri}> rel:spouseOf ?spouse . ?spouse foaf:name ?name }"
+    results = $bbc.query(sparql)
+    return if results.empty?
+    Fact.new(:subject => subject,
+      :verb_phrase => 'was the spouse of',
+      :object => results.first.first)
+  end
   
   def close_friend_of
     sparql = 
@@ -122,10 +135,12 @@ class ArtistFactFinder < FactFinder
     eos
     results = $bbc.query(sparql).flatten
     return if results.empty?
+    results.each { |r| r.gsub!(/\(.+\)/, '') }
+    results.uniq!
     
     Fact.new(:subject => subject,
       :verb_phrase => 'has released',
-      :object => join_sequence(results) + '.')
+      :object => join_sequence(results))
   end
   
   def number_of_releases
@@ -148,13 +163,13 @@ class ArtistFactFinder < FactFinder
     phrases = [
       "My favourte is #{favourive}",
       "I really liked #{favourive}",
-      "#{favourive} was just terrible.",
+      "#{favourive} was just terrible",
     ]
     
     return if results.empty?
     Fact.new(:subject => subject,
       :verb_phrase => 'has released',
-      :object => "#{results.size} records. #{phrases.rand}.")
+      :object => "#{results.size} records. #{phrases.rand}")
   end
   
   def reviews
@@ -179,12 +194,14 @@ class ArtistFactFinder < FactFinder
       PREFIX foaf: <http://xmlns.com/foaf/0.1/>
       PREFIX dc: <http://purl.org/dc/elements/1.1/>
       PREFIX bio: <http://purl.org/vocab/bio/0.1/>
-      SELECT ?record WHERE {
-        <#{@artist.uri}> foaf:made ?r .
-        ?r dc:title ?record .
+      SELECT ?birth WHERE {
+        <#{@artist.uri}> bio:event ?birth .
+        ?birth bio:date ?birth .
       }
     eos
+    puts sparql
     results = $bbc.query(sparql).flatten
+    p results
     
     date = Query.new.select(:formed).
       where(@artist, BIO::event, :birth).
