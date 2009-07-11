@@ -31,12 +31,21 @@ class ArtistFactFinder < FactFinder
     @artist.foaf::name
   end
   
+  def is_group?
+    @artist_type.include?(MO::MusicGroup)
+  end
+  
+  def gender
+    
+  end
+  
   def list_statements
     [
       myspace,
       formed,
       close_friend_of,
-      similar_artists
+      similar_artists,
+      reviews,
     ].compact
   end
   
@@ -93,6 +102,23 @@ class ArtistFactFinder < FactFinder
       :object => results.first.first)
   end
   
+  def reviews
+    sparql = <<-eos
+      PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+      PREFIX dc: <http://purl.org/dc/elements/1.1/>
+      SELECT ?record WHERE {
+        <#{@artist.uri}> foaf:made ?r .
+        ?r dc:title ?record .
+      }
+    eos
+    results = $bbc.query(sparql).flatten
+    return if results.empty?
+    
+    Fact.new(:subject => subject,
+      :verb_phrase => 'has released',
+      :object => join_sequence(results))
+  end
+  
   def formed
     date = Query.new.select(:formed).
       where(@artist, BIO::event, :birth).
@@ -100,7 +126,17 @@ class ArtistFactFinder < FactFinder
     return nil if date.nil?
     date = $1 if date =~ /(\d+)-/
     
-    formed_type = @artist_type.include?(MO::MusicGroup) ? 'formed' : 'born'
+    formed_type = is_group? ? 'formed' : 'born'
     "was #{formed_type} in #{date}"
+  end
+  
+  def join_sequence(array)
+    if array.size==1
+      array.first
+    elsif array.size == 2
+      "#{array.first} and #{array.last}"
+    else
+      array[0..2].join(", ") + " and " + array[3]
+    end
   end
 end

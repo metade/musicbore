@@ -69,7 +69,7 @@ if __FILE__ == $0
   # p bore.bore('http://www.bbc.co.uk/music/artists/9b51f964-2f24-46f4-9550-0f260dcdad48#artist')
   # p bore.bore('http://www.bbc.co.uk/music/artists/5fee3020-513b-48c2-b1f7-4681b01db0c6#artist')
   # p bore.bore('http://www.bbc.co.uk/music/artists/f27ec8db-af05-4f36-916e-3d57f91ecf5e#artist')
-  finder = bore.bore('Metallica')
+  finder = bore.bore('Michael Jackson')
   finder.statements.each { |s| puts s }
 end
 
