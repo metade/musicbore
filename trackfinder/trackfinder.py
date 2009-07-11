@@ -56,10 +56,18 @@ class TestBot(SingleServerIRCBot):
     def find_track(self, cmd, k=0):
         k = k+1
         print "Trying to get audio for %s, try %d" % (cmd,k)
-        alist = artist.search_artists(cmd)
+        try: 
+            alist = artist.search_artists(cmd)
+        except:
+            self.connection.privmsg(self.channel, "No matching artist")
+            return
         if len(alist) == 0 or k > 5:
+            self.connection.privmsg(self.channel, "No matching artist")
             return
         tracks = alist[0].audio()
+        if len(tracks) == 0:
+            self.connection.privmsg(self.channel, "No matching tracks")
+            return
         r_track = tracks[self.random.randint(0, len(tracks) -1)]
         request = urllib2.Request(r_track['url'])
         request.get_method = lambda: "HEAD"
