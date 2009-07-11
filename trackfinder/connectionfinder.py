@@ -12,6 +12,7 @@ class TestBot(SingleServerIRCBot):
         SingleServerIRCBot.__init__(self, [(server, port)], nickname, nickname)
         self.channel = channel
         self.random = Random()
+        self.last_artist_name = ""
 
     def on_nicknameinuse(self, c, e):
         c.nick(c.get_nickname() + "_")
@@ -23,6 +24,9 @@ class TestBot(SingleServerIRCBot):
         self.do_command(e, e.arguments()[0])
 
     def on_pubmsg(self, c, e):
+        if e.arguments()[0].startswith("notracks") and self.last_artist_name != "":
+            self.connection.privmsg(self.channel, "trackfinder:"+self.last_artist_name)
+            
         a = e.arguments()[0].split(":", 1)
         if len(a) > 1 and irc_lower(a[0]) == irc_lower(self.connection.get_nickname()):
             self.do_command(e, a[1])
@@ -65,7 +69,7 @@ FILTER (
 (langMatches(lang(?p2l), "en") || lang(?p2l) = "" ) &&
 (langMatches(lang(?t2l), "en") || lang(?t2l) = "" ) &&
 (langMatches(lang(?p3l), "en") || lang(?p3l) = "" ) &&
-?s != ?t2 && ?s != ?t && ?s != ?o
+?s != ?t2 && ?s != ?t && ?s != ?o && ?t != ?t2 && ?t != ?o && ?t2 != ?o
 )
 }
 """ % (artist_name)
@@ -102,7 +106,8 @@ FILTER (
         sentence += "  which has " + result["p3l"]["value"]
         sentence += " " + result["ol"]["value"]
         self.connection.privmsg(self.channel, "say:"+ sentence.encode('ascii', 'ignore'))
-        time.sleep(5)
+        time.sleep(3)
+        self.last_artist_name = result["ol"]["value"]
         self.connection.privmsg(self.channel, bbc_uri)
 
 def main():
