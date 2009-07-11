@@ -30,16 +30,16 @@ class ArtistSubject < Subject
   
   def pronoun
     case gender
-    when "Male" then "He"
-    when "Female" then "She"
+    when :male then "He"
+    when :female then "She"
     else "They"
     end
   end
 
   def inflect_verb(verb)
     case gender
-    when "Male" then verb.third_person_singular
-    when "Female" then verb.third_person_singular
+    when :male then verb.third_person_singular
+    when :female then verb.third_person_singular
     else verb.third_person_plural
     end
   end

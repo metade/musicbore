@@ -2,11 +2,15 @@
 class ArtistFactFinder < FactFinder
   attr_accessor :subject
   
+  MALE_NAMES, FEMALE_NAMES = {}, {}
+  File.read(File.join(File.dirname(__FILE__), '..', '..', 'data', 'person_male.lst')).split.each { |n| MALE_NAMES[n.downcase] = true }
+  File.read(File.join(File.dirname(__FILE__), '..', '..', 'data', 'person_female.lst')).split.each { |n| FEMALE_NAMES[n.downcase] = true }
+  
   def initialize(artist_uri)
     @artist = MO::Artist.new(artist_uri)
     @artist_type = @artist.rdf::type
     
-    @subject = ArtistSubject.new(:name => name)
+    @subject = ArtistSubject.new(:name => name, :gender => gender)
   end
   
   def resource
@@ -36,7 +40,15 @@ class ArtistFactFinder < FactFinder
   end
   
   def gender
-    
+    return nil if is_group?
+    first_name = $1.downcase if name =~ /(\w+) /
+    if MALE_NAMES[first_name]
+      :male
+    elsif FEMALE_NAMES[first_name]
+      :female
+    else
+      nil
+    end
   end
   
   def list_statements
