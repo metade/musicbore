@@ -5,6 +5,16 @@ class ArtistFactFinder < FactFinder
     @artist_type = @artist.rdf::type
   end
   
+  def self.artist_uri_for_dbpedia_uri(dbpedia_uri)
+    sparql = <<-eos
+      PREFIX owl: <http://www.w3.org/2002/07/owl#>
+      SELECT ?artist WHERE { ?artist owl:sameAs <#{dbpedia_uri}> . }
+    eos
+    results = $bbc.query(sparql)
+    return if results.empty?
+    results.flatten.detect { |r| r.uri =~ %r[www.bbc.co.uk/music/artists/] }
+  end
+  
   def dbpedia_uri
     @dbpedia_uri ||= [@artist.owl::sameAs].flatten.detect { |u| u.uri =~ /dbpedia/ }
   end
