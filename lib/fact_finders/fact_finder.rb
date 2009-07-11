@@ -93,6 +93,16 @@ class FactFinder
     ].flatten
   end
   
+  def bla_bla_bla
+    facts = list_statements.sort { |a,b| rand(3)-1 }
+    string = facts.pop.first_sentence + ' '
+    facts.each do |fact|
+      string += fact.subsequent_sentence + ' '
+      break if string.size > 200
+    end
+    string
+  end
+  
   protected
   
   def tidy_url(url)

@@ -72,20 +72,24 @@ class ArtistFactFinder < FactFinder
     return nil if url.nil?
     Fact.new(:subject => subject,
       :verb_phrase => 'has a myspace at',
-      :object => tidy_url(url))
+      :object => tidy_url(url) + '.')
   end
   
   def similar_artists
      uri = "http://ws.audioscrobbler.com/2.0/artist/#{URI.escape(name)}/similar.txt"
      similar_artists = []
-     open(uri) do |f|
-       f.each_line {|l| similar_artists << l.split(',').last.strip }
+     begin
+       open(uri) do |f|
+         f.each_line {|l| similar_artists << l.split(',').last.strip }
+       end
+     rescue => e
+       puts "Error fetching data from last.fm: #{e.message}"
      end
      similar_artists.each { |a| a.gsub!('&amp;', '&') }
      
      Fact.new(:subject => subject,
        :verb_phrase => 'sound a bit like',
-       :object => similar_artists[0..2].join(", ") + " and " + similar_artists[3])
+       :object => join_sequence(similar_artists[0,rand(3)]) + '.')
    end
   
   def close_friend_of
@@ -114,7 +118,7 @@ class ArtistFactFinder < FactFinder
     
     Fact.new(:subject => subject,
       :verb_phrase => 'has released',
-      :object => join_sequence(results))
+      :object => join_sequence(results) + '.')
   end
   
   def number_of_releases
@@ -130,10 +134,13 @@ class ArtistFactFinder < FactFinder
       }
     eos
     results = $musicbrainz.query(sparql).flatten
+    results.each { |r| r.gsub!(/\(.+\)/, '') }
+    results.uniq!
+    
     return if results.empty?
     Fact.new(:subject => subject,
       :verb_phrase => 'has released',
-      :object => "#{results.size} records")
+      :object => "#{results.size} records. My favourite is #{results[rand(results.size)]}.")
   end
   
   def reviews
