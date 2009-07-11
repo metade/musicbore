@@ -20,9 +20,6 @@ class FactFinder
   def statements
     list = list_statements
     list[0] = "#{name} #{list[0]}"
-    list[1,].each do |s|
-      "They #{s}"
-    end
     list
   end
   
