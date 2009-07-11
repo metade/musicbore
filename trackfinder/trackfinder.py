@@ -64,7 +64,11 @@ class TestBot(SingleServerIRCBot):
         if len(alist) == 0 or k > 5:
             self.connection.privmsg(self.channel, "No matching artist")
             return
-        tracks = alist[0].audio()
+        try:
+            tracks = alist[0].audio()
+        except:
+            self.connection.privmsg(self.channel, "No matching tracks")
+            return
         if len(tracks) == 0:
             self.connection.privmsg(self.channel, "No matching tracks")
             return
