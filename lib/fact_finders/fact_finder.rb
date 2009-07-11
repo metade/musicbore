@@ -1,35 +1,39 @@
 class Subject
   attr_accessor :name
   
+  def initialize(options = {})
+    @name = options[:name]
+  end
+  
   def pronoun
     'it'
   end
 end
 
 class ArtistSubject < Subject
-  attr_accessor :name
+  attr_accessor :name, :gender
   
-  def pronoun
-    'he'
-  end
-end
-
-class Fact
-  attr_accessor :subject, :verb_phrase, :object, :gender
-
   def initialize(options = {})
-    @subject = options[:subject]
-    @verb_phrase = options[:verb_phrase]
-    @object = options[:object]
+    @name = options[:name]
     @gender = options[:gender]
   end
-
+  
   def pronoun
     case gender
     when "Male" then "He"
     when "Female" then "She"
     else "They"
     end
+  end
+end
+
+class Fact
+  attr_accessor :subject, :verb_phrase, :object
+
+  def initialize(options = {})
+    @subject = options[:subject]
+    @verb_phrase = options[:verb_phrase]
+    @object = options[:object]
   end
 
   def first_sentence
