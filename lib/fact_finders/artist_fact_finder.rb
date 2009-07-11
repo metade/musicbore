@@ -2,6 +2,7 @@
 class ArtistFactFinder < FactFinder
   def initialize(artist_uri)
     @artist = MO::Artist.new(artist_uri)
+    puts "loading #{artist_uri}"
     ConnectionPool.adapters.first.load(artist_uri, 'rdfxml')
     @artist_type = @artist.rdf::type
   end
@@ -18,7 +19,6 @@ class ArtistFactFinder < FactFinder
   end
   
   def myspace
-    p MO::myspace
     "#{MO::myspace.bore::label} #{tidy_url(@artist.mo::myspace)}"
   end
   
