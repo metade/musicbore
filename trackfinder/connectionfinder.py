@@ -48,8 +48,39 @@ class TestBot(SingleServerIRCBot):
             self.dcc_connect(address, port)
 
     def do_command(self, e, cmd, results = []):
-        artist_name = cmd
-        sparql = """
+        artist_name = ""
+        if cmd.startswith("http://dbpedia.org"):
+            uri = cmd
+            sparql = """
+SELECT ?pl ?tl ?p2l ?t2l ?p3l ?ol ?o ?sl WHERE {
+<%s> ?p ?t ; <http://dbpedia.org/property/name> ?sl.
+?t ?p2 ?t2 .
+?t2 ?p3 ?o .
+?p rdfs:label ?pl .
+?t rdfs:label ?tl .
+?p2 rdfs:label ?p2l .
+?t2 rdfs:label ?t2l .
+?p3 rdfs:label ?p3l .
+?o <http://dbpedia.org/property/wikiPageUsesTemplate> <http://dbpedia.org/resource/Template:infobox_musical_artist> .
+?o <http://dbpedia.org/property/name> ?ol .
+
+FILTER (
+(langMatches(lang(?sl), "en") || lang(?sl) = "" ) &&
+(langMatches(lang(?ol), "en") || lang(?ol) = "" ) &&
+(langMatches(lang(?pl), "en") || lang(?pl) = "" ) &&
+(langMatches(lang(?tl), "en") || lang(?tl) = "" ) &&
+(langMatches(lang(?p2l), "en") || lang(?p2l) = "" ) &&
+(langMatches(lang(?t2l), "en") || lang(?t2l) = "" ) &&
+(langMatches(lang(?p3l), "en") || lang(?p3l) = "" ) &&
+(<%s> != ?t2 && <%s> != ?t && <%s> != ?o && ?t != ?t2 && ?t != ?o && ?t2 != ?o) &&
+(str(?p) != "http://dbpedia.org/ontology/genre") &&
+(str(?p2) != "http://dbpedia.org/ontology/genre")
+)
+}
+""" % (uri, uri, uri, uri)
+        else:
+            artist_name = cmd
+            sparql = """
 SELECT ?pl ?tl ?p2l ?t2l ?p3l ?ol ?o WHERE {
 ?s <http://dbpedia.org/property/name> "%s"@en .
 ?s a <http://dbpedia.org/ontology/Band> ; ?p ?t .
@@ -60,7 +91,7 @@ SELECT ?pl ?tl ?p2l ?t2l ?p3l ?ol ?o WHERE {
 ?p2 rdfs:label ?p2l .
 ?t2 rdfs:label ?t2l .
 ?p3 rdfs:label ?p3l .
-?o a <http://dbpedia.org/ontology/Band> .
+?o <http://dbpedia.org/property/wikiPageUsesTemplate> <http://dbpedia.org/resource/Template:infobox_musical_artist> .
 ?o <http://dbpedia.org/property/name> ?ol .
 
 FILTER (
@@ -82,7 +113,6 @@ FILTER (
         dbpedia.setReturnFormat(JSON)
         if results == []:
             results = dbpedia.query().convert()
-        sentence = artist_name
         r = results["results"]["bindings"]
         if len(r) == 0:
             self.connection.privmsg(self.channel, "No connections found")
@@ -106,6 +136,9 @@ FILTER (
         if result["ol"]["value"] in self.played_artists:
             self.do_command(e, cmd, results)
             return
+        if cmd.startswith("http://dbpedia.org"):
+            artist_name = result["sl"]["value"]
+        sentence = artist_name
         sentence += " has " + self.prop(result["pl"]["value"])
         sentence += " " + result["tl"]["value"]
         sentence += " which has " + self.prop(result["p2l"]["value"])
@@ -116,7 +149,10 @@ FILTER (
         time.sleep(3)
         self.last_artist_name = result["ol"]["value"]
         self.played_artists.append(self.last_artist_name)
-        self.connection.privmsg(self.channel, bbc_uri)
+        self.connection.privmsg(self.channel, "playartist:"+bbc_uri)
+        time.sleep(15)
+        if cmd.startswith("http://dbpedia.org"):
+            self.connection.privmsg(self.channel, "thebore:"+bbc_uri)
 
     def prop(self, p):
         if p == 'associatedMusicalArtist' or p == 'associatedBand':
