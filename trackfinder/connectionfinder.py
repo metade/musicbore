@@ -1,14 +1,10 @@
 #!/usr/bin/python
 
-from pyechonest import artist, config
 from ircbot import SingleServerIRCBot
 from irclib import nm_to_n, nm_to_h, irc_lower, ip_numstr_to_quad, ip_quad_to_numstr
 from random import *
+from SPARQLWrapper import SPARQLWrapper, JSON, XML
 import urllib2
-import socket
-
-timeout = 2
-socket.setdefaulttimeout(timeout)
 
 class TestBot(SingleServerIRCBot):
     def __init__(self, channel, nickname, server, port=6667):
@@ -46,35 +42,51 @@ class TestBot(SingleServerIRCBot):
             self.dcc_connect(address, port)
 
     def do_command(self, e, cmd):
-        #for sim in alist[0].similar():
-        #    self.connection.privmsg(self.channel, sim.name.encode('ascii', 'ignore'))
-        r_track = self.find_track(cmd)
-        if r_track:
-            self.connection.privmsg(self.channel, "play:" +r_track['url'])
-            self.connection.privmsg(self.channel, "madjack:play")
+        artist_name = cmd
+        sparql = """
+SELECT ?pl ?tl ?p2l ?t2l ?p3l ?ol WHERE {
+?s <http://dbpedia.org/property/name> "%s"@en .
+?s a <http://dbpedia.org/ontology/Band> ; ?p ?t .
+?t ?p2 ?t2 .
+?t2 ?p3 ?o .
+?p rdfs:label ?pl .
+?t rdfs:label ?tl .
+?p2 rdfs:label ?p2l .
+?t2 rdfs:label ?t2l .
+?p3 rdfs:label ?p3l .
+?o a <http://dbpedia.org/ontology/Band> .
+?o <http://dbpedia.org/property/name> ?ol .
 
-    def find_track(self, cmd, k=0):
-        k = k+1
-        print "Trying to get audio for %s, try %d" % (cmd,k)
-        alist = artist.search_artists(cmd)
-        if len(alist) == 0 or k > 5:
+FILTER (
+(langMatches(lang(?ol), "en") || lang(?ol) = "" ) &&
+(langMatches(lang(?pl), "en") || lang(?pl) = "" ) &&
+(langMatches(lang(?tl), "en") || lang(?tl) = "" ) &&
+(langMatches(lang(?p2l), "en") || lang(?p2l) = "" ) &&
+(langMatches(lang(?t2l), "en") || lang(?t2l) = "" ) &&
+(langMatches(lang(?p3l), "en") || lang(?p3l) = "" ) &&
+?s != ?t2 && ?s != ?t && ?s != ?o
+)
+}
+""" % (artist_name)
+        print sparql
+        dbpedia = SPARQLWrapper("http://dbpedia.org/sparql")
+        dbpedia.setQuery(sparql)
+        dbpedia.setReturnFormat(JSON)
+        results = dbpedia.query().convert()
+        sentence = artist_name
+        r = results["results"]["bindings"]
+        if len(r) == 0:
             return
-        tracks = alist[0].audio()
-        r_track = tracks[self.random.randint(0, len(tracks) -1)]
-        request = urllib2.Request(r_track['url'])
-        request.get_method = lambda: "HEAD"
-        try:
-            http_file = urllib2.urlopen(request)
-        except:
-            return self.find_track(cmd, k)
-        ct = http_file.headers["content-type"]
-        if ct == 'audio/mpeg':
-            return r_track
-        else:
-            return self.find_track(cmd, k)
+        result = r[self.random.randint(0, len(r) - 1)]
+        sentence += " has " + result["pl"]["value"]
+        sentence += " " + result["tl"]["value"]
+        sentence += " which has " + result["p2l"]["value"]
+        sentence += " " + result["t2l"]["value"]
+        sentence += "  which has " + result["p3l"]["value"]
+        sentence += " " + result["ol"]["value"]
+        self.connection.privmsg(self.channel, "say:"+ sentence.encode('ascii', 'ignore'))
 
 def main():
-    config.ECHO_NEST_API_KEY="O7HXFLBKKXN05PDQU"
     import sys
     if len(sys.argv) != 4:
         print "Usage: testbot <server[:port]> <channel> <nickname>"
