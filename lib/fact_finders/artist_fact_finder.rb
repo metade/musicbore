@@ -2,11 +2,6 @@
 class ArtistFactFinder < FactFinder
   def initialize(artist_uri)
     @artist = MO::Artist.new(artist_uri)
-    if @artist.rdf::type.nil?
-      puts "loading #{artist_uri}"
-      ConnectionPool.adapters.first.load(artist_uri, 'rdfxml')
-      ConnectionPool.adapters.first.load(dbpedia_uri.uri, 'rdfxml') unless dbpedia_uri.nil?
-    end
     @artist_type = @artist.rdf::type
   end
   
@@ -21,12 +16,23 @@ class ArtistFactFinder < FactFinder
   def list_statements
     [
       myspace,
-      formed
+      formed,
+      close_friend_of,
     ].compact
   end
   
   def myspace
     "#{MO::myspace.bore::label} #{tidy_url(@artist.mo::myspace)}"
+  end
+  
+  def close_friend_of
+    sparql = 
+      "PREFIX rel: <http://purl.org/vocab/relationship/> " +
+      "PREFIX foaf: <http://xmlns.com/foaf/0.1/> " + 
+      "SELECT ?name WHERE { <#{@artist.uri}> rel:closeFriendOf ?friend . ?friend foaf:name ?name }"
+    results = $bbc.query(sparql)
+    return if results.empty?
+    return "is a close friend of #{results.first.first}"
   end
   
   def formed
