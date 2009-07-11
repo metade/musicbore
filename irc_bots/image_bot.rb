@@ -62,11 +62,12 @@ class IRC
         data = image_for( $1 )
 
         artist_image = data['artist']['image']['src']
+        #         artist_image.gsub!('7col_in','1024x768')
         artist_name = data['artist']['name']
 
         if artist_image
           send_msg("Found image for #{artist_name}")
-          system("open #{artist_image}")
+          system("curl #{artist_image} > /tmp/tmp.jpg && open /tmp/tmp.jpg")
         end
       end
     else
