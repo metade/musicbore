@@ -5,6 +5,7 @@ from irclib import nm_to_n, nm_to_h, irc_lower, ip_numstr_to_quad, ip_quad_to_nu
 from random import *
 from SPARQLWrapper import SPARQLWrapper, JSON, XML
 import urllib2
+import time
 
 class TestBot(SingleServerIRCBot):
     def __init__(self, channel, nickname, server, port=6667):
@@ -41,10 +42,10 @@ class TestBot(SingleServerIRCBot):
                 return
             self.dcc_connect(address, port)
 
-    def do_command(self, e, cmd):
+    def do_command(self, e, cmd, results = []):
         artist_name = cmd
         sparql = """
-SELECT ?pl ?tl ?p2l ?t2l ?p3l ?ol WHERE {
+SELECT ?pl ?tl ?p2l ?t2l ?p3l ?ol ?o WHERE {
 ?s <http://dbpedia.org/property/name> "%s"@en .
 ?s a <http://dbpedia.org/ontology/Band> ; ?p ?t .
 ?t ?p2 ?t2 .
@@ -72,12 +73,28 @@ FILTER (
         dbpedia = SPARQLWrapper("http://dbpedia.org/sparql")
         dbpedia.setQuery(sparql)
         dbpedia.setReturnFormat(JSON)
-        results = dbpedia.query().convert()
+        if results == []:
+            results = dbpedia.query().convert()
         sentence = artist_name
         r = results["results"]["bindings"]
         if len(r) == 0:
+            self.connection.privmsg(self.channel, "No connections found")
             return
+        talis = SPARQLWrapper("http://api.talis.com/stores/bbc-backstage/services/sparql")
         result = r[self.random.randint(0, len(r) - 1)]
+        talis_sparql = """PREFIX owl: <http://www.w3.org/2002/07/owl#> SELECT ?a WHERE  {?a owl:sameAs <""" + result["o"]["value"]+ """>  FILTER (regex(str(?a), "^http://www.bbc" )) }"""
+        talis.setQuery(talis_sparql)
+        print talis_sparql
+        talis.setReturnFormat(XML)
+        talis_results = talis.query().convert()
+        bbc_uri = ""
+        try:
+            bbc_uri = talis_results.childNodes[1].childNodes[3].childNodes[1].childNodes[1].childNodes[1].childNodes[0].data
+        except:
+            self.do_command(e, cmd, results)
+        if bbc_uri == "":
+            return
+        print bbc_uri
         sentence += " has " + result["pl"]["value"]
         sentence += " " + result["tl"]["value"]
         sentence += " which has " + result["p2l"]["value"]
@@ -85,6 +102,8 @@ FILTER (
         sentence += "  which has " + result["p3l"]["value"]
         sentence += " " + result["ol"]["value"]
         self.connection.privmsg(self.channel, "say:"+ sentence.encode('ascii', 'ignore'))
+        time.sleep(5)
+        self.connection.privmsg(self.channel, bbc_uri)
 
 def main():
     import sys
