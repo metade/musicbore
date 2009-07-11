@@ -1,4 +1,6 @@
 class DBPediaFactFinder < FactFinder
+  attr_reader :resource
+  
   def initialize(dbpedia_uri)
     @resource = DBPEDIA::Resource.new(dbpedia_uri)
   end
