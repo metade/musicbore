@@ -1,3 +1,6 @@
+require 'rubygems'
+require 'activesupport'
+
 class Subject
   attr_accessor :name
   
@@ -7,6 +10,10 @@ class Subject
   
   def pronoun
     'it'
+  end
+  
+  def inflect_verb(verb)
+    ActiveSupport::Inflector.pluralize(verb)
   end
 end
 
@@ -25,6 +32,15 @@ class ArtistSubject < Subject
     else "They"
     end
   end
+
+  def inflect_verb(verb)
+    case gender
+    when "Male" then ActiveSupport::Inflector.pluralize(verb)
+    when "Female" then ActiveSupport::Inflector.pluralize(verb)
+    else verb
+    end
+  end
+  
 end
 
 class Fact
@@ -35,13 +51,19 @@ class Fact
     @verb_phrase = options[:verb_phrase]
     @object = options[:object]
   end
-
+  
+  def inflected_verb_phrase
+    verb = verb_phrase.split.first
+    inflected_verb = subject.inflect_verb(verb)
+    verb_phrase.gsub(verb,inflected_verb)
+  end
+  
   def first_sentence
-    [subject.name, self.verb_phrase, self.object].join(" ")
+    [subject.name, inflected_verb_phrase, object].join(" ")
   end
 
   def subsequent_sentence
-    [subject.pronoun, self.verb_phrase, self.object].join(" ")
+    [subject.pronoun, inflected_verb_phrase, object].join(" ")
   end
 end
 
