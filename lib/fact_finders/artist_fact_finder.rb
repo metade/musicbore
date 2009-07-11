@@ -18,11 +18,15 @@ class ArtistFactFinder < FactFinder
       myspace,
       formed,
       close_friend_of,
+      similar_artists
     ].compact
   end
   
   def myspace
-    "has a myspace at #{tidy_url(@artist.mo::myspace)}"
+    Fact.new(:subject => name,
+      :verb_phrase => 'has a myspace at',
+      :object => tidy_url(@artist.mo::myspace),
+      :gender => gender)
   end
   
   def two_degrees
@@ -45,8 +49,21 @@ class ArtistFactFinder < FactFinder
       }
     eos
     results = $dbpedia.query(sparql)
-    p results
   end
+  
+  def similar_artists
+     uri = "http://ws.audioscrobbler.com/2.0/artist/#{URI.escape(name)}/similar.txt"
+     similar_artists = []
+     open(uri) do |f|
+       f.each_line {|l| similar_artists << l.split(',').last.strip }
+     end
+     similar_artists.each { |a| a.gsub!('&amp;', '&') }
+     
+     Fact.new(:subject => name,
+       :verb_phrase => 'sound a bit like',
+       :object => similar_artists[0..2].join(", ") + " and " + similar_artists[3],
+       :gender => gender)
+   end
   
   def close_friend_of
     sparql = 
@@ -55,7 +72,10 @@ class ArtistFactFinder < FactFinder
       "SELECT ?name WHERE { <#{@artist.uri}> rel:closeFriendOf ?friend . ?friend foaf:name ?name }"
     results = $bbc.query(sparql)
     return if results.empty?
-    return "is a close friend of #{results.first.first}"
+    Fact.new(:subject => name,
+      :verb_phrase => 'is a close friend of',
+      :object => results.first.first,
+      :gender => gender)
   end
   
   def formed

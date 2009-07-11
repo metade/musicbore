@@ -1,8 +1,27 @@
 class Fact
-  attr_accessor :subject
-  
-  def to_s
-    
+  attr_accessor :subject, :verb_phrase, :object, :gender
+
+  def initialize(options = {})
+    @subject = options[:subject]
+    @verb_phrase = options[:verb_phrase]
+    @object = options[:object]
+    @gender = options[:gender]
+  end
+
+  def pronoun
+    case gender
+    when "Male" then "He"
+    when "Female" then "She"
+    else "They"
+    end
+  end
+
+  def first_sentence
+    [subject, self.verb_phrase, self.object].join(" ")
+  end
+
+  def subsequent_sentence
+    [pronoun, self.verb_phrase, self.object].join(" ")
   end
 end
 
@@ -18,9 +37,9 @@ class FactFinder
   end
   
   def statements
-    list = list_statements
-    list[0] = "#{name} #{list[0]}"
-    list
+    facts = list_statements
+    [facts.pop.first_sentence,
+      facts.map {|f| f.subsequent_sentence}].flatten
   end
   
   protected
