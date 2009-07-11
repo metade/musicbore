@@ -68,6 +68,10 @@ class Fact
   def subsequent_sentence
     [subject.pronoun, inflected_verb_phrase, object].join(" ")
   end
+  
+  def final_sentence
+    ["and", inflected_verb_phrase, object].join(" ")
+  end
 end
 
 class FactFinder
@@ -84,7 +88,9 @@ class FactFinder
   def statements
     facts = list_statements
     [facts.pop.first_sentence,
-      facts.map {|f| f.subsequent_sentence}].flatten
+     facts[0..facts.size-1].map {|f| f.subsequent_sentence},
+     facts.last.final_sentence
+    ].flatten
   end
   
   protected
