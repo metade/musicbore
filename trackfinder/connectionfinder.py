@@ -13,6 +13,7 @@ class TestBot(SingleServerIRCBot):
         self.channel = channel
         self.random = Random()
         self.last_artist_name = ""
+        self.played_artists = []
 
     def on_nicknameinuse(self, c, e):
         c.nick(c.get_nickname() + "_")
@@ -69,7 +70,9 @@ FILTER (
 (langMatches(lang(?p2l), "en") || lang(?p2l) = "" ) &&
 (langMatches(lang(?t2l), "en") || lang(?t2l) = "" ) &&
 (langMatches(lang(?p3l), "en") || lang(?p3l) = "" ) &&
-?s != ?t2 && ?s != ?t && ?s != ?o && ?t != ?t2 && ?t != ?o && ?t2 != ?o
+(?s != ?t2 && ?s != ?t && ?s != ?o && ?t != ?t2 && ?t != ?o && ?t2 != ?o) &&
+(str(?p) != "http://dbpedia.org/ontology/genre") &&
+(str(?p2) != "http://dbpedia.org/ontology/genre")
 )
 }
 """ % (artist_name)
@@ -96,19 +99,29 @@ FILTER (
             bbc_uri = talis_results.childNodes[1].childNodes[3].childNodes[1].childNodes[1].childNodes[1].childNodes[0].data
         except:
             self.do_command(e, cmd, results)
+            return
         if bbc_uri == "":
             return
         print bbc_uri
-        sentence += " has " + result["pl"]["value"]
+        if result["ol"]["value"] in self.played_artists:
+            self.do_command(e, cmd, results)
+            return
+        sentence += " has " + self.prop(result["pl"]["value"])
         sentence += " " + result["tl"]["value"]
-        sentence += " which has " + result["p2l"]["value"]
+        sentence += " which has " + self.prop(result["p2l"]["value"])
         sentence += " " + result["t2l"]["value"]
-        sentence += "  which has " + result["p3l"]["value"]
+        sentence += "  which has " + self.prop(result["p3l"]["value"])
         sentence += " " + result["ol"]["value"]
         self.connection.privmsg(self.channel, "say:"+ sentence.encode('ascii', 'ignore'))
         time.sleep(3)
         self.last_artist_name = result["ol"]["value"]
+        self.played_artists.append(self.last_artist_name)
         self.connection.privmsg(self.channel, bbc_uri)
+
+    def prop(self, p):
+        if p == 'associatedMusicalArtist' or p == 'associatedBand':
+            return 'played with'
+        return p
 
 def main():
     import sys
