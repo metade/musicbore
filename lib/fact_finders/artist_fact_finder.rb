@@ -17,6 +17,15 @@ class ArtistFactFinder < FactFinder
     @artist.uri
   end
   
+  def dbtune_uri
+    gid = $1 if @artist.uri =~ %r[http://www.bbc.co.uk/music/artists/(.+)#artist]
+    "http://dbtune.org/musicbrainz/resource/artist/#{gid}"
+  end
+  
+  def dbpedia_uri
+    @dbpedia_uri ||= [@artist.owl::sameAs].flatten.detect { |u| u.uri =~ /dbpedia/ }
+  end
+  
   def self.artist_uri_for_dbpedia_uri(dbpedia_uri)
     sparql = <<-eos
       PREFIX owl: <http://www.w3.org/2002/07/owl#>
@@ -27,12 +36,8 @@ class ArtistFactFinder < FactFinder
     results.flatten.detect { |r| r.uri =~ %r[www.bbc.co.uk/music/artists/] }
   end
   
-  def dbpedia_uri
-    @dbpedia_uri ||= [@artist.owl::sameAs].flatten.detect { |u| u.uri =~ /dbpedia/ }
-  end
-  
   def name
-    @artist.foaf::name
+    @name ||= @artist.foaf::name
   end
   
   def is_group?
@@ -58,35 +63,16 @@ class ArtistFactFinder < FactFinder
       close_friend_of,
       similar_artists,
       reviews,
+      number_of_releases
     ].compact
   end
   
   def myspace
+    url = @artist.mo::myspace
+    return nil if url.nil?
     Fact.new(:subject => subject,
       :verb_phrase => 'has a myspace at',
-      :object => tidy_url(@artist.mo::myspace))
-  end
-  
-  def two_degrees
-    sparql = <<-eos
-      SELECT ?pl ?tl ?p2l ?ol WHERE {
-      <http://dbpedia.org/resource/Fugazi> a <http://dbpedia.org/ontology/Band> ; ?p ?t . 
-      ?t ?p2 ?o .
-      ?p rdfs:label ?pl .
-      ?t rdfs:label ?tl .
-      ?p2 rdfs:label ?p2l .
-      ?o a <http://dbpedia.org/ontology/Band> .
-      ?o <http://dbpedia.org/property/name> ?ol .
-
-      FILTER (
-      (langMatches(lang(?ol), "en") || lang(?ol) = "" ) && 
-      (langMatches(lang(?pl), "en") || lang(?pl) = "" ) &&
-      (langMatches(lang(?tl), "en") || lang(?tl) = "" ) &&
-      (langMatches(lang(?p2l), "en") || lang(?p2l) = "" )
-      )
-      }
-    eos
-    results = $dbpedia.query(sparql)
+      :object => tidy_url(url))
   end
   
   def similar_artists
@@ -112,6 +98,42 @@ class ArtistFactFinder < FactFinder
     Fact.new(:subject => subject,
       :verb_phrase => 'is a close friend of',
       :object => results.first.first)
+  end
+  
+  def reviews
+    sparql = <<-eos
+      PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+      PREFIX dc: <http://purl.org/dc/elements/1.1/>
+      SELECT ?record WHERE {
+        <#{@artist.uri}> foaf:made ?r .
+        ?r dc:title ?record .
+      }
+    eos
+    results = $bbc.query(sparql).flatten
+    return if results.empty?
+    
+    Fact.new(:subject => subject,
+      :verb_phrase => 'has released',
+      :object => join_sequence(results))
+  end
+  
+  def number_of_releases
+    sparql = <<-eos
+      PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+      PREFIX dc: <http://purl.org/dc/elements/1.1/>
+      PREFIX  mo: <http://purl.org/ontology/mo/>
+      
+      SELECT DISTINCT ?record WHERE {
+        ?r foaf:maker <#{dbtune_uri}> .
+        ?r a mo:Record .
+        ?r dc:title ?record .
+      }
+    eos
+    results = $musicbrainz.query(sparql).flatten
+    return if results.empty?
+    Fact.new(:subject => subject,
+      :verb_phrase => 'has released',
+      :object => "#{results.size} records")
   end
   
   def reviews

@@ -37,8 +37,10 @@ class Bore
     Namespace.register(:dbpedia, 'http://dbpedia.org/resource/')
     
     $bbc = ConnectionPool.add_data_source(:type => :sparql, :url => 'http://api.talis.com/stores/bbc-backstage/services/sparql', :engine => :virtuoso)
-    $dbpedia = ConnectionPool.add_data_source(:type => :sparql, :url => 'http://dbpedia.org/sparql', :engine => :virtuoso)
     $bbc.enabled = true
+    
+    $dbpedia = ConnectionPool.add_data_source(:type => :sparql, :url => 'http://dbpedia.org/sparql', :engine => :virtuoso)
+    $musicbrainz = ConnectionPool.add_data_source(:type => :sparql, :url => 'http://dbtune.org/musicbrainz/sparql', :engine => :virtuoso)
   end
   
   def bore(topic=nil)
