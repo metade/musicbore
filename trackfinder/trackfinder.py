@@ -4,6 +4,7 @@ from pyechonest import artist, config
 from ircbot import SingleServerIRCBot
 from irclib import nm_to_n, nm_to_h, irc_lower, ip_numstr_to_quad, ip_quad_to_numstr
 from random import *
+import urllib2
 
 class TestBot(SingleServerIRCBot):
     def __init__(self, channel, nickname, server, port=6667):
@@ -41,11 +42,31 @@ class TestBot(SingleServerIRCBot):
             self.dcc_connect(address, port)
 
     def do_command(self, e, cmd):
-        alist = artist.search_artists(cmd)
         #for sim in alist[0].similar():
         #    self.connection.privmsg(self.channel, sim.name.encode('ascii', 'ignore'))
+        r_track = self.find_track(cmd)
+        if r_track:
+            self.connection.privmsg(self.channel, r_track)
+
+    def find_track(self, cmd, k=0):
+        k = k+1
+        print "Trying to get audio for %s, try %d" % (cmd,k)
+        alist = artist.search_artists(cmd)
+        if len(alist) == 0 or k > 5:
+            return
         tracks = alist[0].audio()
-        self.connection.privmsg(self.channel, tracks[self.random.randint(0, len(tracks) -1)])
+        r_track = tracks[self.random.randint(0, len(tracks) -1)]
+        request = urllib2.Request(r_track['url'])
+        request.get_method = lambda: "HEAD"
+        try:
+            http_file = urllib2.urlopen(request)
+        except:
+            return self.find_track(cmd, k)
+        ct = http_file.headers["content-type"]
+        if ct == 'audio/mpeg':
+            return r_track
+        else:
+            return self.find_track(cmd, k)
 
 def main():
     config.ECHO_NEST_API_KEY="O7HXFLBKKXN05PDQU"
