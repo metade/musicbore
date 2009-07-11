@@ -1,13 +1,16 @@
-require 'active_rdf'
 
 class ArtistFactFinder < FactFinder
   def initialize(artist_uri)
     @artist = MO::Artist.new(artist_uri)
+    ConnectionPool.adapters.first.load(artist_uri, 'rdfxml')
     @artist_type = @artist.rdf::type
   end
   
+  def name
+    @artist.foaf::name
+  end
   
-  def statements
+  def list_statements
     [
       myspace,
       formed
@@ -15,7 +18,8 @@ class ArtistFactFinder < FactFinder
   end
   
   def myspace
-    "#{@artist.foaf::name} #{MO::myspace.bore::label} #{tidy_url(@artist.mo::myspace)}"
+    p MO::myspace
+    "#{MO::myspace.bore::label} #{tidy_url(@artist.mo::myspace)}"
   end
   
   def formed
@@ -26,6 +30,6 @@ class ArtistFactFinder < FactFinder
     date = $1 if date =~ /(\d+)-/
     
     formed_type = @artist_type.include?(MO::MusicGroup) ? 'formed' : 'born'
-    "#{@artist.foaf::name} :was #{formed_type} in #{date}"
+    "was #{formed_type} in #{date}"
   end
 end

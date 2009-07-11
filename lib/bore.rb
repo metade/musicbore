@@ -1,5 +1,9 @@
 require 'rubygems'
+require 'active_rdf'
 require 'irc'
+
+require 'lib/fact_finders/fact_finder'
+require 'lib/fact_finders/artist_fact_finder'
 
 class Bore
   def initialize
@@ -8,6 +12,9 @@ class Bore
     Namespace.register(:bore, 'http://github.com/bore/')
     Namespace.register(:bio, 'http://purl.org/vocab/bio/0.1/')
     adapter = ConnectionPool.add_data_source(:type => :redland, :location => 'db/triples')
+    adapter.load('vocab.ttl', 'turtle') #if adapter.size==0
+    
+    puts adapter.dump
   end
   
   def bore(topic=nil)
