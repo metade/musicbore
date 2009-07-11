@@ -30,5 +30,6 @@ end
 if __FILE__ == $0
   bore = Bore.new
   p bore.bore('http://www.bbc.co.uk/music/artists/9b51f964-2f24-46f4-9550-0f260dcdad48#artist')
+  p bore.bore('http://www.bbc.co.uk/music/artists/5fee3020-513b-48c2-b1f7-4681b01db0c6#artist')
 end
 

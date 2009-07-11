@@ -2,9 +2,16 @@
 class ArtistFactFinder < FactFinder
   def initialize(artist_uri)
     @artist = MO::Artist.new(artist_uri)
-    puts "loading #{artist_uri}"
-    ConnectionPool.adapters.first.load(artist_uri, 'rdfxml')
+    if @artist.rdf::type.nil?
+      puts "loading #{artist_uri}"
+      ConnectionPool.adapters.first.load(artist_uri, 'rdfxml')
+      ConnectionPool.adapters.first.load(dbpedia_uri.uri, 'rdfxml') unless dbpedia_uri.nil?
+    end
     @artist_type = @artist.rdf::type
+  end
+  
+  def dbpedia_uri
+    @dbpedia_uri ||= [@artist.owl::sameAs].flatten.detect { |u| u.uri =~ /dbpedia/ }
   end
   
   def name
