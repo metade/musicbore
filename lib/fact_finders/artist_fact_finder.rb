@@ -1,8 +1,16 @@
 
 class ArtistFactFinder < FactFinder
+  attr_accessor :subject
+  
   def initialize(artist_uri)
     @artist = MO::Artist.new(artist_uri)
     @artist_type = @artist.rdf::type
+    
+    @subject = ArtistSubject.new(:name => name)
+  end
+  
+  def resource
+    @artist.uri
   end
   
   def self.artist_uri_for_dbpedia_uri(dbpedia_uri)
@@ -33,10 +41,9 @@ class ArtistFactFinder < FactFinder
   end
   
   def myspace
-    Fact.new(:subject => name,
+    Fact.new(:subject => subject,
       :verb_phrase => 'has a myspace at',
-      :object => tidy_url(@artist.mo::myspace),
-      :gender => gender)
+      :object => tidy_url(@artist.mo::myspace))
   end
   
   def two_degrees
@@ -69,10 +76,9 @@ class ArtistFactFinder < FactFinder
      end
      similar_artists.each { |a| a.gsub!('&amp;', '&') }
      
-     Fact.new(:subject => name,
+     Fact.new(:subject => subject,
        :verb_phrase => 'sound a bit like',
-       :object => similar_artists[0..2].join(", ") + " and " + similar_artists[3],
-       :gender => gender)
+       :object => similar_artists[0..2].join(", ") + " and " + similar_artists[3])
    end
   
   def close_friend_of
@@ -82,10 +88,9 @@ class ArtistFactFinder < FactFinder
       "SELECT ?name WHERE { <#{@artist.uri}> rel:closeFriendOf ?friend . ?friend foaf:name ?name }"
     results = $bbc.query(sparql)
     return if results.empty?
-    Fact.new(:subject => name,
+    Fact.new(:subject => subject,
       :verb_phrase => 'is a close friend of',
-      :object => results.first.first,
-      :gender => gender)
+      :object => results.first.first)
   end
   
   def formed

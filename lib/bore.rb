@@ -34,6 +34,7 @@ class Bore
     Namespace.register(:bore, 'http://github.com/bore/')
     Namespace.register(:bio, 'http://purl.org/vocab/bio/0.1/')
     Namespace.register(:rel, 'http://purl.org/vocab/relationship/')
+    Namespace.register(:dbpedia, 'http://dbpedia.org/resource/')
     
     $bbc = ConnectionPool.add_data_source(:type => :sparql, :url => 'http://api.talis.com/stores/bbc-backstage/services/sparql', :engine => :virtuoso)
     $dbpedia = ConnectionPool.add_data_source(:type => :sparql, :url => 'http://dbpedia.org/sparql', :engine => :virtuoso)
@@ -41,8 +42,7 @@ class Bore
   end
   
   def bore(topic=nil)
-    fact_finder = determine_fact_finder(topic)
-    fact_finder.statements
+    determine_fact_finder(topic)
   end
   
   protected
@@ -56,7 +56,7 @@ class Bore
       if artist_uri
         ArtistFactFinder.new(artist_uri) 
       else
-        DBPediaFactFinder.new(topic)
+        DBPediaFactFinder.new(dbpedia_uri)
       end
     end
   end
@@ -69,7 +69,7 @@ if __FILE__ == $0
   # p bore.bore('http://www.bbc.co.uk/music/artists/9b51f964-2f24-46f4-9550-0f260dcdad48#artist')
   # p bore.bore('http://www.bbc.co.uk/music/artists/5fee3020-513b-48c2-b1f7-4681b01db0c6#artist')
   # p bore.bore('http://www.bbc.co.uk/music/artists/f27ec8db-af05-4f36-916e-3d57f91ecf5e#artist')
-  p bore.bore('Michael Jackson')
-  
+  finder = bore.bore('Metallica')
+  finder.statements.each { |s| puts s }
 end
 

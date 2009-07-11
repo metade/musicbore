@@ -51,9 +51,16 @@ IRCEvent.add_callback('endofmotd') { |event| bot.add_channel('#bbcmusicbore') }
 IRCEvent.add_callback('privmsg') do |event|
   if event.message =~ /bore:(.*)/
     puts $1
-    statements = bore.bore($1)
-    statements.each do |statement|
-      bot.send_message(event.channel, "say:#{statement}")
+    begin
+      fact_finder = bore.bore($1)
+      bot.send_message(event.channel, fact_finder.resource)
+      fact_finder.statements.each do |statement|
+        bot.send_message(event.channel, "say:#{statement}")
+      end
+      bot.send_message(event.channel, "connectionfinder:#{$1}") #if event.from == 'relationshipfinder'
+    rescue => e
+      bot.send_message(event.channel, "doh! #{e.message}")
+      puts e.backtrace
     end
   end
 end
