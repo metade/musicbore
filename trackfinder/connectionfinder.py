@@ -25,12 +25,12 @@ class TestBot(SingleServerIRCBot):
         self.do_command(e, e.arguments()[0])
 
     def on_pubmsg(self, c, e):
-        if e.arguments()[0].startswith("notracks") and self.last_artist_name != "":
-            self.connection.privmsg(self.channel, "trackfinder:"+self.last_artist_name)
-            
         a = e.arguments()[0].split(":", 1)
         if len(a) > 1 and irc_lower(a[0]) == irc_lower(self.connection.get_nickname()):
-            self.do_command(e, a[1])
+            if a[1].startswith("notracks") and self.last_artist_name != "":
+                self.connection.privmsg(self.channel, "trackfinder:"+self.last_artist_name)
+            else:
+                self.do_command(e, a[1])
 
     def on_dccmsg(self, c, e):
         c.privmsg("You said: " + e.arguments()[0])
@@ -88,7 +88,7 @@ FILTER (
             results = dbpedia.query().convert()
         r = results["results"]["bindings"]
         if len(r) == 0:
-            self.connection.privmsg(self.channel, "No connections found")
+            self.connection.privmsg(self.channel, "control:next")
             return
         result = r[self.random.randint(0, len(r) - 1)]
         bbc_uri = self.bbc_uri(result)
@@ -108,11 +108,11 @@ FILTER (
         sentence += ",  which " + self.prop(result["p3l"]["value"])
         sentence += " " + result["ol"]["value"] + "?"
         self.connection.privmsg(self.channel, "say:"+ sentence.encode('ascii', 'ignore'))
-        time.sleep(3)
+        #time.sleep(3)
         self.last_artist_name = result["ol"]["value"]
         self.played_artists.append(self.last_artist_name)
         self.connection.privmsg(self.channel, "playartist:"+bbc_uri)
-        time.sleep(15)
+        #time.sleep(15)
         if cmd.startswith("http://dbpedia.org"):
             self.connection.privmsg(self.channel, "thebore:"+bbc_uri)
 
