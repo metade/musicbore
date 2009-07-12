@@ -17,7 +17,7 @@ IRCEvent.add_callback('join') do |event|
   if event.from=='controller'
     message = [
       "Hello. I am the Music Bore. I play music and I like to tell you ALL about the music I play.",
-      "I get my information from the BBC, last.fm, Linked Data...",
+      "I get my information from BBC Music, BBC Programmes, last fm, the Echo Nest, Yahoo Weather and the web of Linked Data.",
       "To find out more, please visit bit.ly/musicbore.",
       "Now let me play you some music.",
     ]
