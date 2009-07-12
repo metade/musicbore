@@ -51,7 +51,6 @@ class TestBot(SingleServerIRCBot):
         self.place_connection(e, cmd, results)
 
     def prop(self, p):
-        print p
         if p == 'born':
             return "is born"
         if p == 'death place':
