@@ -1,14 +1,12 @@
 require 'rubygems'
 require 'activesupport'
+
+$LOAD_PATH << File.join(File.dirname(__FILE__),'..')
+require 'ext/array'
+
 $LOAD_PATH << File.join(File.dirname(__FILE__),'..','..','vendor','grammar','lib')
 require File.join(File.dirname(__FILE__),'..','..','vendor','grammar','lib','grammar.rb')
 require File.join(File.dirname(__FILE__),'..','..','vendor','grammar','lib','grammar','ext','string.rb')
-
-class Array
-  def rand
-    self[Kernel.rand(self.size)]
-  end
-end
 
 class Subject
   attr_accessor :name
