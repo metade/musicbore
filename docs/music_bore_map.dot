@@ -10,7 +10,6 @@ digraph G {
   thebore -> connectionfinder [label=0.333];
   
   placefinder -> connectionfinder;
-  hotnessfinder -> connectionfinder;
   
   connectionfinder -> controller;
   
@@ -19,6 +18,9 @@ digraph G {
   placefinder -> say;
   hotnessfinder -> say;
   weather -> say;
+  connectionfinder -> say;
+  
+  trackfinder -> control;
   
   musicfinder -> trackfinder;
   trackfinder -> madjack;

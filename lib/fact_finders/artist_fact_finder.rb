@@ -67,7 +67,8 @@ class ArtistFactFinder < FactFinder
   def statements
     [
       myspace,
-      formed,
+      wikipedia_sentence,
+      # formed,
       brands_played_on,
       spouse_of,
       close_friend_of,
@@ -102,6 +103,17 @@ class ArtistFactFinder < FactFinder
     Fact.new(:subject => subject,
      :verb_phrase => 'sound a bit like',
      :object => join_sequence(similar_artists[0,1+rand(2)]))
+  end
+  
+  def wikipedia_sentence
+    uri = "http://www.bbc.co.uk/music/artists/#{gid}.yaml"
+    data = open(uri) {|f| YAML::load(f)}
+    
+    artist_name = data['artist']['name']
+    wikipedia_text = data['artist']['wikipedia_article']['content']
+
+    shuffled_sentences = wikipedia_text.split('. ').sort_by{rand}
+    FreeformFact.new(:sentence => shuffled_sentences.first)
   end
   
   def brands_played_on
