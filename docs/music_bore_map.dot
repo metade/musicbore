@@ -19,6 +19,9 @@ digraph G {
   placefinder -> say;
   hotnessfinder -> say;
   weather -> say;
+  connectionfinder -> say;
+  
+  trackfinder -> control;
   
   musicfinder -> trackfinder;
   trackfinder -> madjack;
