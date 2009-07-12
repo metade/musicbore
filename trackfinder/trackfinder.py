@@ -59,18 +59,18 @@ class TestBot(SingleServerIRCBot):
         try: 
             alist = artist.search_artists(cmd)
         except:
-            self.connection.privmsg(self.channel, "No matching artist")
+            self.connection.privmsg(self.channel, "control:next")
             return
         if len(alist) == 0 or k > 5:
-            self.connection.privmsg(self.channel, "No matching artist")
+            self.connection.privmsg(self.channel, "control:next")
             return
         try:
             tracks = alist[0].audio()
         except:
-            self.connection.privmsg(self.channel, "No matching tracks")
+            self.connection.privmsg(self.channel, "control:next")
             return
         if len(tracks) == 0:
-            self.connection.privmsg(self.channel, "No matching tracks")
+            self.connection.privmsg(self.channel, "control:next")
             return
         r_track = tracks[self.random.randint(0, len(tracks) -1)]
         request = urllib2.Request(r_track['url'])
