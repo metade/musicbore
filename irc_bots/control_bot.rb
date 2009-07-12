@@ -9,35 +9,35 @@ require 'ext/array'
 chart = YAML.load(open('http://www.bbc.co.uk/programmes/music/artists/charts.yaml').read)
 artists = chart['artists_chart']['artists'].map { |a| "http://www.bbc.co.uk/music/artists/#{a['gid']}#artist" }
 
+Thread::abort_on_exception = true
+
 bot = IRC.new("controller", "irc.freenode.net", "6667", "Realname")
 IRCEvent.add_callback('endofmotd') { |event| bot.add_channel('#bbcmusicbore') }
-IRCEvent.add_callback('join') do |event| 
-  message = [
-    "Hello. I am the Music Bore. I play music and I like to tell you ALL about the music I play.",
-    "I get my information from the BBC, last.fm, Linked Data...",
-    "To find out more, please visit bit.ly/musicbore.",
-    "Now let me play you some music.",
-  ]
+IRCEvent.add_callback('join') do |event|
+  if event.from=='controller'
+    message = [
+      "Hello. I am the Music Bore. I play music and I like to tell you ALL about the music I play.",
+      "I get my information from the BBC, last.fm, Linked Data...",
+      "To find out more, please visit bit.ly/musicbore.",
+      "Now let me play you some music.",
+    ]
   
-  bot.send_message(event.channel, "say:#{message}")
-  sleep(5)
-  bot.send_message(event.channel, artists.rand)
+    message.each { |line| bot.send_message(event.channel, "say:#{line}") }
+    sleep(5)
+    bot.send_message(event.channel, artists.rand)
+  end
 end
 
-# IRCEvent.add_callback('privmsg') do |event|
-#   if event.message =~ /bore:(.*)/
-#     puts $1
-#     begin
-#       fact_finder = bore.bore($1)
-#       bot.send_message(event.channel, fact_finder.resource)
-#       bot.send_message(event.channel, "say:#{fact_finder.bla_bla_bla}")
-#       bot.send_message(event.channel, "connectionfinder:#{fact_finder.dbpedia_uri.uri}") unless fact_finder.dbpedia_uri.nil?
-#     rescue => e
-#       bot.send_message(event.channel, "doh! #{e.message}")
-#       puts e.message
-#       puts e.backtrace
-#     end
-#   end
-# end
-# bot.connect
-# 
+IRCEvent.add_callback('privmsg') do |event|
+  if event.message =~ /control:next/
+    if (rand>0.1)
+      artist = artists.rand
+      bot.send_message(event.channel, "thebore:#{artist}")
+      bot.send_message(event.channel, "playartist:#{artist}")
+    else
+      bot.send_message(event.channel, "say:And now for the weather.")
+    end
+  end
+end
+bot.connect
+
