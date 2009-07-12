@@ -1,5 +1,3 @@
-require 'rubygems'
-require 'lib/bore'
 require 'irc'
 
 # patch for Ruby-IRC and freenode, see http://rubyforge.org/tracker/index.php?func=detail&aid=19988&group_id=1784&atid=6979
@@ -42,19 +40,3 @@ class IRCEvent
      end
    end
 end
-
-Thread::abort_on_exception = true
-
-bore = Bore.new
-bot = IRC.new("thebore", "irc.freenode.net", "6667", "Realname")
-IRCEvent.add_callback('endofmotd') { |event| bot.add_channel('#bbcmusicbore') }
-IRCEvent.add_callback('privmsg') do |event|
-  if event.message =~ /bore:(.*)/
-    puts $1
-    statements = bore.bore($1)
-    statements.each do |statement|
-      bot.send_message(event.channel, "say:#{statement}")
-    end
-  end
-end
-bot.connect
