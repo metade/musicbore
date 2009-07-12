@@ -48,14 +48,24 @@ class TestBot(SingleServerIRCBot):
     def do_command(self, e, cmd):
         #for sim in alist[0].similar():
         #    self.connection.privmsg(self.channel, sim.name.encode('ascii', 'ignore'))
-        r_track = self.find_track(cmd)
-        if r_track:
-            self.connection.privmsg(self.channel, "play:" +r_track['url'])
-            self.connection.privmsg(self.channel, "madjack:play")
+        hot = self.find_hotness(cmd)
+        if hot:
+            self.connection.privmsg(self.channel, self.sentence(cmd,hot) )
 
-    def find_track(self, cmd, k=0):
+    def sentence(self, cmd, hot):
+        if hot > 0.9:
+            return "say: Wow, %s is really, really hot right now! Did he die recently?" % cmd
+        if hot > 0.7:
+            return "say: %s is quite hot lately!" %cmd
+        if hot > 0.4:
+            return "say: %s is quite exciting" % cmd
+        if hot > 0.2:
+            return "say: To say the truth, %s is quite boring, but hey, they have to pay the bills" % cmd
+        return "%s is a really horrible, horrible band, but I want you to stop listening to that show. Get a life."
+
+
+    def find_hotness(self, cmd, k=0):
         k = k+1
-        print "Trying to get audio for %s, try %d" % (cmd,k)
         try: 
             alist = artist.search_artists(cmd)
         except:
@@ -64,26 +74,7 @@ class TestBot(SingleServerIRCBot):
         if len(alist) == 0 or k > 5:
             self.connection.privmsg(self.channel, "No matching artist")
             return
-        try:
-            tracks = alist[0].audio()
-        except:
-            self.connection.privmsg(self.channel, "No matching tracks")
-            return
-        if len(tracks) == 0:
-            self.connection.privmsg(self.channel, "No matching tracks")
-            return
-        r_track = tracks[self.random.randint(0, len(tracks) -1)]
-        request = urllib2.Request(r_track['url'])
-        request.get_method = lambda: "HEAD"
-        try:
-            http_file = urllib2.urlopen(request)
-        except:
-            return self.find_track(cmd, k)
-        ct = http_file.headers["content-type"]
-        if ct == 'audio/mpeg':
-            return r_track
-        else:
-            return self.find_track(cmd, k)
+        return alist[0].hotttnesss()
 
 def main():
     config.ECHO_NEST_API_KEY="O7HXFLBKKXN05PDQU"
