@@ -118,7 +118,7 @@ class IRC
     when /^:(.+?)!(.+?)@(.+?)\sPRIVMSG\s(.+)\s:(.+)$/i
       p [$1,$2,$3,$4,$5]
       message = $5
-      if message.downcase =~ /weather/
+      if message.downcase =~ /weatherbot: weather/
         weather_forecast()
       end
     else
