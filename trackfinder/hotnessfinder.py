@@ -54,15 +54,14 @@ class TestBot(SingleServerIRCBot):
 
     def sentence(self, cmd, hot):
         if hot > 0.9:
-            return "say: Wow, %s is really, really hot right now! Did he die recently?" % cmd
+            return "say: Wow, %s is really, really hot right now! Did they die recently?" % cmd
         if hot > 0.7:
-            return "say: %s is quite hot lately!" %cmd
+            return "say: %s is really generating a buzz lately!" %cmd
         if hot > 0.4:
-            return "say: %s is quite exciting" % cmd
+            return "say: I've been hearing some good things about %s" % cmd
         if hot > 0.2:
-            return "say: To say the truth, %s is quite boring, but hey, they have to pay the bills" % cmd
-        return "%s is a really horrible, horrible band, but I want you to stop listening to that show. Get a life."
-
+            return "say: To tell you the truth, I find %s boring. But, I guess they have to pay the bills" % cmd
+        return "%s is really tedious. I want you to stop listening to them right now!"
 
     def find_hotness(self, cmd, k=0):
         k = k+1
