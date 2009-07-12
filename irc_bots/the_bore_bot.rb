@@ -17,7 +17,7 @@ IRCEvent.add_callback('privmsg') do |event|
       fact_finder = bore.bore($1)
       bot.send_message(event.channel, fact_finder.resource)
       bot.send_message(event.channel, "say:#{fact_finder.bla_bla_bla}")
-      next_bot = %w(connectionfinder placefinder hotnessfinder)
+      next_bot = %w(connectionfinder placefinder hotnessfinder).rand
       if next_bot=='hotnessfinder'
         bot.send_message(event.channel, "#{next_bot}:#{fact_finder.dbpedia_uri.uri}") unless fact_finder.dbpedia_uri.nil?
       else
