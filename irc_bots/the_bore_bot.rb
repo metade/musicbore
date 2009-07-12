@@ -1,6 +1,9 @@
 require 'rubygems'
-require 'lib/bore'
-require 'lib/ruby_irc'
+
+$LOAD_PATH << File.join(File.dirname(__FILE__),'..','lib')
+require 'bore'
+require 'ruby_irc'
+require 'ext/array'
 
 Thread::abort_on_exception = true
 
