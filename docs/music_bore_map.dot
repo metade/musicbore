@@ -1,0 +1,26 @@
+digraph G { 
+  controller -> musicfinder;
+  controller -> thebore;
+  controller -> weather [label=0.1];
+  
+  weather->controller;
+  
+  thebore -> hotnessfinder [label=0.333];
+  thebore -> placefinder [label=0.333];
+  thebore -> connectionfinder [label=0.333];
+  
+  placefinder -> connectionfinder;
+  hotnessfinder -> connectionfinder;
+  
+  connectionfinder -> controller;
+  
+  controller -> say;
+  thebore -> say;
+  placefinder -> say;
+  hotnessfinder -> say;
+  weather -> say;
+  
+  musicfinder -> trackfinder;
+  trackfinder -> madjack;
+  musicfinder -> madjack;
+}
