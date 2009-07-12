@@ -90,6 +90,7 @@ FILTER (
         r = results["results"]["bindings"]
         if len(r) == 0:
             self.connection.privmsg(self.channel, "No connections found")
+            self.connection.privmsg(self.channel, "connectionfinder:"+uri)
             return
         result = r[self.random.randint(0, len(r) - 1)]
         bbc_uri = self.bbc_uri(result)
