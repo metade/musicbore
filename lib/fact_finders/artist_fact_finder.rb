@@ -123,7 +123,7 @@ class ArtistFactFinder < FactFinder
     superlative = %w(super big massive).rand
     
     sentence = "#{brand['title']} on BBC #{service} is a #{superlative} fan"
-    if (rand>0.5)
+    if (brand['plays'].to_i>10 and rand>0.4)
       fact = Fact.new(:subject => subject,
         :verb_phrase => 'has been played',
         :object => "#{brand['plays']} times on this show!") 
