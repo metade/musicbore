@@ -28,7 +28,7 @@ class TestBot(SingleServerIRCBot):
         a = e.arguments()[0].split(":", 1)
         if len(a) > 1 and irc_lower(a[0]) == irc_lower(self.connection.get_nickname()):
             if a[1].startswith("notracks") and self.last_artist_name != "":
-                self.connection.privmsg(self.channel, "trackfinder:"+self.last_artist_name)
+                self.connection.privmsg(self.channel, "trackfinder:"+self.last_artist_name.encode('ascii', 'ignore'))
             else: 
                 self.do_command(e, a[1])
 
@@ -106,11 +106,11 @@ FILTER (
         sentence += self.prop(result["pl"]["value"]) + " in " + result["place_label"]["value"] + ", and that " + result["ol"]["value"]
         sentence += " " + self.prop(result["p2l"]["value"]) + " in the same place?"
         self.connection.privmsg(self.channel, "say:"+ sentence.encode('ascii', 'ignore'))
-        time.sleep(3)
+        #time.sleep(3)
         self.last_artist_name = result["ol"]["value"]
         self.played_artists.append(self.last_artist_name)
         self.connection.privmsg(self.channel, "playartist:"+bbc_uri)
-        time.sleep(15)
+        #time.sleep(15)
         if cmd.startswith("http://dbpedia.org"):
             self.connection.privmsg(self.channel, "thebore:"+bbc_uri)
 
