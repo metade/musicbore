@@ -16,14 +16,14 @@ IRCEvent.add_callback('endofmotd') { |event| bot.add_channel('#bbcmusicbore') }
 IRCEvent.add_callback('join') do |event|
   if event.from=='controller'
     message = [
-      "Hello. I am the Music Bore. I play music and I like to tell you ALL about the music I play.",
-      "I get my information from BBC Music, BBC Programmes, last fm, the Echo Nest, Yahoo Weather and the web of Linked Data.",
-      "To find out more, please visit bit.ly/musicbore.",
-      "Now let me play you some music.",
+      "Hello. I am the Music Bore. I play music and I like to tell you ALL about the music I play. ",
+      "I live on IRC. ",
+      "I get my information from BBC Music, BBC Programmes, last fm, the Echo Nest, Yahoo and the web of Linked Data. ",
+      "To find out more, please visit bit.ly/musicbore. ",
+      "Now let me play you some music. ",
     ]
-  
     message.each { |line| bot.send_message(event.channel, "say:#{line}") }
-    sleep(5)
+    sleep(30)
     bot.send_message(event.channel, artists.rand)
   end
 end
@@ -32,6 +32,7 @@ IRCEvent.add_callback('privmsg') do |event|
   if event.message =~ /control:next/
     if (rand>0.1)
       artist = artists.rand
+      bot.send_message(event.channel, "-------------------------------------------")
       bot.send_message(event.channel, "thebore:#{artist}")
       bot.send_message(event.channel, "playartist:#{artist}")
     else

@@ -10,7 +10,6 @@ digraph G {
   thebore -> connectionfinder [label=0.333];
   
   placefinder -> connectionfinder;
-  hotnessfinder -> connectionfinder;
   
   connectionfinder -> controller;
   

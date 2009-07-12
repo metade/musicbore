@@ -48,7 +48,7 @@ class IRC
     
     if weather
       forecast = construct_forcast_text_for(weather)
-      send_msg("say['victoria']: #{forecast}")
+      send_msg("say[victoria]: #{forecast}")
     end
     send_msg("control:next")
   end

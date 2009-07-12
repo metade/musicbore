@@ -68,7 +68,7 @@ class ArtistFactFinder < FactFinder
     [
       myspace,
       wikipedia_sentence,
-      formed,
+      # formed,
       brands_played_on,
       spouse_of,
       close_friend_of,
