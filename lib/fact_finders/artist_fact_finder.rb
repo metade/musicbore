@@ -17,8 +17,11 @@ class ArtistFactFinder < FactFinder
     @artist.uri
   end
   
+  def gid
+    $1 if @artist.uri =~ %r[http://www.bbc.co.uk/music/artists/(.+)#artist]
+  end
+  
   def dbtune_uri
-    gid = $1 if @artist.uri =~ %r[http://www.bbc.co.uk/music/artists/(.+)#artist]
     "http://dbtune.org/musicbrainz/resource/artist/#{gid}"
   end
   
@@ -65,6 +68,7 @@ class ArtistFactFinder < FactFinder
     [
       myspace,
       formed,
+      brands_played_on,
       spouse_of,
       close_friend_of,
       similar_artists,
@@ -98,7 +102,36 @@ class ArtistFactFinder < FactFinder
     Fact.new(:subject => subject,
      :verb_phrase => 'sound a bit like',
      :object => join_sequence(similar_artists[0,1+rand(2)]))
-   end
+  end
+  
+  def brands_played_on
+    begin
+      chart = YAML.load(open("http://www.bbc.co.uk/programmes/music/artists/#{gid}.yaml"))
+    rescue
+      return nil
+    end
+    
+    brand = chart['artist']['brands_played_on'].first
+    
+    services = {
+      '1xtra' => 'One Extra',
+      'radio1' => 'Radio One',
+      'radio2' => 'Radio Two',
+      '6music' => 'Six Music',      
+    }
+    service = services[brand['service_key']] || brand['service_key']
+    superlative = %w(super big massive).rand
+    
+    sentence = "#{brand['title']} on BBC #{service} is a #{superlative} fan"
+    if (rand>0.5)
+      fact = Fact.new(:subject => subject,
+        :verb_phrase => 'has been played',
+        :object => "#{brand['plays']} times on this show!") 
+      sentence += '. ' + fact.to_s
+    end
+    
+    FreeformFact.new(:sentence => sentence)
+  end
   
   def spouse_of
     sparql = 

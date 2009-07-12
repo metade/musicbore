@@ -48,7 +48,6 @@ class ArtistSubject < Subject
     else verb.third_person_plural
     end
   end
-  
 end
 
 class Fact
@@ -78,6 +77,28 @@ class Fact
   
   def final_sentence
     ["and", inflected_verb_phrase, object].join(" ")
+  end
+  
+  def to_s
+    subsequent_sentence
+  end
+end
+
+class FreeformFact < Fact
+  def initialize(options={})
+    @sentence = options[:sentence]
+  end
+  
+  def first_sentence
+    @sentence
+  end
+  
+  def subsequent_sentence
+    @sentence
+  end
+  
+  def final_sentence
+    @sentence
   end
 end
 

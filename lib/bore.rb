@@ -76,7 +76,7 @@ if __FILE__ == $0
   # p bore.bore('http://www.bbc.co.uk/music/artists/5fee3020-513b-48c2-b1f7-4681b01db0c6#artist')
   # p bore.bore('http://www.bbc.co.uk/music/artists/f27ec8db-af05-4f36-916e-3d57f91ecf5e#artist')
   finder = bore.bore('Michael Jackson')
-  p finder.spouse_of
+  p finder.brands_played_on
   # finder = bore.bore('http://dbpedia.org/resource/Barry_White')
   # finder = bore.bore('http://www.bbc.co.uk/music/artists/67b5ddb2-c2e3-467a-ad6a-4c1b981e6748#artist')
   # finder.statements.each { |s| puts s }
