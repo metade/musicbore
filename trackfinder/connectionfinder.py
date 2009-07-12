@@ -25,11 +25,10 @@ class TestBot(SingleServerIRCBot):
         self.do_command(e, e.arguments()[0])
 
     def on_pubmsg(self, c, e):
-        if e.arguments()[0].startswith("notracks") and self.last_artist_name != "":
-            self.connection.privmsg(self.channel, "trackfinder:"+self.last_artist_name)
-            
         a = e.arguments()[0].split(":", 1)
         if len(a) > 1 and irc_lower(a[0]) == irc_lower(self.connection.get_nickname()):
+            if a[1].startswith("notracks") and self.last_artist_name != "":
+                self.connection.privmsg(self.channel, "trackfinder:"+self.last_artist_name)
             self.do_command(e, a[1])
 
     def on_dccmsg(self, c, e):
@@ -88,7 +87,7 @@ FILTER (
             results = dbpedia.query().convert()
         r = results["results"]["bindings"]
         if len(r) == 0:
-            self.connection.privmsg(self.channel, "No connections found")
+            self.connection.privmsg(self.channel, "control:next")
             return
         result = r[self.random.randint(0, len(r) - 1)]
         bbc_uri = self.bbc_uri(result)
