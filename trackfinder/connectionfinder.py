@@ -48,10 +48,12 @@ class TestBot(SingleServerIRCBot):
             self.dcc_connect(address, port)
 
     def do_command(self, e, cmd, results = []):
+        self.arbitrary_connection(e, cmd, results)
+
+    def arbitrary_connection(self, e, cmd, results = []):
         artist_name = ""
-        if cmd.startswith("http://dbpedia.org"):
-            uri = cmd
-            sparql = """
+        uri = cmd
+        sparql = """
 SELECT ?pl ?tl ?p2l ?t2l ?p3l ?ol ?o ?sl WHERE {
 <%s> ?p ?t ; <http://dbpedia.org/property/name> ?sl.
 ?t ?p2 ?t2 .
@@ -78,35 +80,6 @@ FILTER (
 )
 }
 """ % (uri, uri, uri, uri)
-        else:
-            artist_name = cmd
-            sparql = """
-SELECT ?pl ?tl ?p2l ?t2l ?p3l ?ol ?o WHERE {
-?s <http://dbpedia.org/property/name> "%s"@en .
-?s a <http://dbpedia.org/ontology/Band> ; ?p ?t .
-?t ?p2 ?t2 .
-?t2 ?p3 ?o .
-?p rdfs:label ?pl .
-?t rdfs:label ?tl .
-?p2 rdfs:label ?p2l .
-?t2 rdfs:label ?t2l .
-?p3 rdfs:label ?p3l .
-?o <http://dbpedia.org/property/wikiPageUsesTemplate> <http://dbpedia.org/resource/Template:infobox_musical_artist> .
-?o <http://dbpedia.org/property/name> ?ol .
-
-FILTER (
-(langMatches(lang(?ol), "en") || lang(?ol) = "" ) &&
-(langMatches(lang(?pl), "en") || lang(?pl) = "" ) &&
-(langMatches(lang(?tl), "en") || lang(?tl) = "" ) &&
-(langMatches(lang(?p2l), "en") || lang(?p2l) = "" ) &&
-(langMatches(lang(?t2l), "en") || lang(?t2l) = "" ) &&
-(langMatches(lang(?p3l), "en") || lang(?p3l) = "" ) &&
-(?s != ?t2 && ?s != ?t && ?s != ?o && ?t != ?t2 && ?t != ?o && ?t2 != ?o) &&
-(str(?p) != "http://dbpedia.org/ontology/genre") &&
-(str(?p2) != "http://dbpedia.org/ontology/genre")
-)
-}
-""" % (artist_name)
         print sparql
         dbpedia = SPARQLWrapper("http://dbpedia.org/sparql")
         dbpedia.setQuery(sparql)
@@ -117,34 +90,23 @@ FILTER (
         if len(r) == 0:
             self.connection.privmsg(self.channel, "No connections found")
             return
-        talis = SPARQLWrapper("http://api.talis.com/stores/bbc-backstage/services/sparql")
         result = r[self.random.randint(0, len(r) - 1)]
-        talis_sparql = """PREFIX owl: <http://www.w3.org/2002/07/owl#> SELECT ?a WHERE  {?a owl:sameAs <""" + result["o"]["value"]+ """>  FILTER (regex(str(?a), "^http://www.bbc" )) }"""
-        talis.setQuery(talis_sparql)
-        print talis_sparql
-        talis.setReturnFormat(XML)
-        talis_results = talis.query().convert()
-        bbc_uri = ""
-        try:
-            bbc_uri = talis_results.childNodes[1].childNodes[3].childNodes[1].childNodes[1].childNodes[1].childNodes[0].data
-        except:
-            self.do_command(e, cmd, results)
-            return
+        bbc_uri = self.bbc_uri(result)
         if bbc_uri == "":
+            self.do_command(e, cmd, results)
             return
         print bbc_uri
         if result["ol"]["value"] in self.played_artists:
             self.do_command(e, cmd, results)
             return
-        if cmd.startswith("http://dbpedia.org"):
-            artist_name = result["sl"]["value"]
-        sentence = artist_name
-        sentence += " has " + self.prop(result["pl"]["value"])
+        artist_name = result["sl"]["value"]
+        sentence = "Did you know that " + artist_name
+        sentence += " " + self.prop(result["pl"]["value"])
         sentence += " " + result["tl"]["value"]
-        sentence += " which has " + self.prop(result["p2l"]["value"])
+        sentence += " which " + self.prop(result["p2l"]["value"])
         sentence += " " + result["t2l"]["value"]
-        sentence += "  which has " + self.prop(result["p3l"]["value"])
-        sentence += " " + result["ol"]["value"]
+        sentence += ",  which " + self.prop(result["p3l"]["value"])
+        sentence += " " + result["ol"]["value"] + "?"
         self.connection.privmsg(self.channel, "say:"+ sentence.encode('ascii', 'ignore'))
         time.sleep(3)
         self.last_artist_name = result["ol"]["value"]
@@ -156,8 +118,30 @@ FILTER (
 
     def prop(self, p):
         if p == 'associatedMusicalArtist' or p == 'associatedBand':
-            return 'played with'
-        return p
+            return 'has played with'
+        if p == 'associated acts':
+            return 'used to be quite close to'
+        if p == 'label':
+            return 'is signed on'
+        if p == 'foundationOrganisation' or p == 'foundationPerson':
+            return 'was founded by'
+        if p == 'past members':
+            return 'used to feature'
+        return "has " + p
+
+    def bbc_uri(self, result):
+        talis = SPARQLWrapper("http://api.talis.com/stores/bbc-backstage/services/sparql")
+        talis_sparql = """PREFIX owl: <http://www.w3.org/2002/07/owl#> SELECT ?a WHERE  {?a owl:sameAs <""" + result["o"]["value"]+ """>  FILTER (regex(str(?a), "^http://www.bbc" )) }"""
+        talis.setQuery(talis_sparql)
+        print talis_sparql
+        talis.setReturnFormat(XML)
+        talis_results = talis.query().convert()
+        bbc_uri = ""
+        try:
+            bbc_uri = talis_results.childNodes[1].childNodes[3].childNodes[1].childNodes[1].childNodes[1].childNodes[0].data
+            return bbc_uri
+        except:
+            return ""
 
 def main():
     import sys
