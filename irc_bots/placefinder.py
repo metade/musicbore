@@ -76,10 +76,11 @@ SELECT ?sl ?pl ?p2l ?o ?ol ?place_label WHERE {
 ?place rdfs:label ?place_label .
 ?o <http://dbpedia.org/property/name> ?ol .
 FILTER (
+(str(?place) != 'http://dbpedia.org/resource/United_States') &&
 (langMatches(lang(?ol), "en") || lang(?ol) = "" ) &&
 (langMatches(lang(?place_label), "en") || lang(?place_label) = "" )
 )
-}
+} LIMIT 500
 """ % (uri, uri)
         print sparql
         dbpedia = SPARQLWrapper("http://dbpedia.org/sparql")

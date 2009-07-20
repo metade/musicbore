@@ -78,7 +78,7 @@ FILTER (
 (str(?p) != "http://dbpedia.org/ontology/genre") &&
 (str(?p2) != "http://dbpedia.org/ontology/genre")
 )
-}
+} LIMIT 500
 """ % (uri, uri, uri, uri)
         print sparql
         dbpedia = SPARQLWrapper("http://dbpedia.org/sparql")
