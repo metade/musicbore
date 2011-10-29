@@ -14,17 +14,17 @@ task :doc => ['doc:rdoc']
 task :test => ['test:run']
 
 namespace :doc do
-  
+
   def rdoc_dir
     File.join(PROJECT_ROOT, 'doc', 'rdoc')
   end
-  
+
   desc 'OSX only: open the RDoc in the default browser'
   task :open do
     raise 'Run doc:rdoc before doc:show' unless File.exists?(rdoc_dir)
     system "open #{File.join(rdoc_dir, 'index.html')}"
   end
-  
+
   Rake::RDocTask.new(:rdoc) do |rdoc|
     rdoc.rdoc_dir = rdoc_dir
     rdoc.title    = 'Grammar Documentation'
@@ -34,7 +34,7 @@ namespace :doc do
     rdoc.options << '--inline-source'
     rdoc.options << '--charset' << 'utf-8'
   end
-  
+
 end
 
 namespace :test do
@@ -45,7 +45,7 @@ namespace :test do
       fl.include File.join(PROJECT_ROOT, 'test', 'lib')
     end
   end
-  
+
   def test_files
     FileList.new do |fl|
       fl.include "#{PROJECT_ROOT}/test/**/*_test.rb"
@@ -60,5 +60,5 @@ namespace :test do
     t.test_files = test_files
     t.verbose = true
   end
-  
+
 end

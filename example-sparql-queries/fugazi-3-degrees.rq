@@ -1,5 +1,5 @@
 SELECT ?pl ?tl ?p2l ?t2l ?p3l ?ol WHERE {
-<http://dbpedia.org/resource/Fugazi> a <http://dbpedia.org/ontology/Band> ; ?p ?t . 
+<http://dbpedia.org/resource/Fugazi> a <http://dbpedia.org/ontology/Band> ; ?p ?t .
 ?t ?p2 ?t2 .
 ?t2 ?p3 ?o .
 ?p rdfs:label ?pl .
@@ -11,11 +11,11 @@ SELECT ?pl ?tl ?p2l ?t2l ?p3l ?ol WHERE {
 ?o <http://dbpedia.org/property/name> ?ol .
 
 FILTER (
-(langMatches(lang(?ol), "en") || lang(?ol) = "" ) && 
+(langMatches(lang(?ol), "en") || lang(?ol) = "" ) &&
 (langMatches(lang(?pl), "en") || lang(?pl) = "" ) &&
 (langMatches(lang(?tl), "en") || lang(?tl) = "" ) &&
 (langMatches(lang(?p2l), "en") || lang(?p2l) = "" ) &&
 (langMatches(lang(?t2l), "en") || lang(?t2l) = "" ) &&
-(langMatches(lang(?p3l), "en") || lang(?p3l) = "" ) 
+(langMatches(lang(?p3l), "en") || lang(?p3l) = "" )
 )
 }

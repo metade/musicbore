@@ -5,19 +5,19 @@ require 'grammar/gender'
 require 'grammar/case'
 
 class PartsOfSpeechTest < Test::Unit::TestCase
-  
+
   def test_valid_numbers
     [:singular, :plural].each do |n|
       assert Grammar::Number::valid_number?(n)
     end
   end
-  
+
   def test_invalid_numbers
     [:xsingular, :plurals, 1, 2, nil].each do |n|
       assert !Grammar::Number::valid_number?(n)
     end
   end
-  
+
   def test_parse_number
     {
       :singular => Grammar::Number::SINGULAR,
@@ -31,19 +31,19 @@ class PartsOfSpeechTest < Test::Unit::TestCase
       assert_equal v, Grammar::Number::parse(k)
     end
   end
-  
+
   def test_valid_persons
     [:first, :second, :third].each do |p|
       assert Grammar::Person::valid_person?(p)
     end
   end
-  
+
   def test_invalid_persons
     [1, 2, 3, :ffirst, :fourth, 0, 4, nil].each do |p|
       assert !Grammar::Person::valid_person?(p)
     end
   end
-  
+
   def test_parse_person
     {
       [:first]        => Grammar::Person::FIRST,
@@ -58,7 +58,7 @@ class PartsOfSpeechTest < Test::Unit::TestCase
       assert_equal v, Grammar::Person::parse(*k)
     end
   end
-  
+
   def test_parse_gender
     {
       'f'       => Grammar::Gender::FEMALE,
@@ -77,17 +77,17 @@ class PartsOfSpeechTest < Test::Unit::TestCase
       assert_equal v, Grammar::Gender::parse(k)
     end
   end
-  
+
   def test_valid_genders
     [:m, :f, :n].each do |g|
       assert Grammar::Gender::valid_gender?(g)
     end
   end
-  
+
   def test_invalid_genders
     [:male, :female, :neuter, nil].each do |g|
       assert !Grammar::Gender::valid_gender?(g)
     end
   end
-  
+
 end

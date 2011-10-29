@@ -24,9 +24,9 @@ require 'grammar/conjugator'
 #   # => "You can't add yourself to your friends list!"
 class Grammar::GrammaticalContext
   include Grammar::Pronoun
-  
+
   attr_reader :audience
-  
+
   # Options:
   # * <tt>:subject</tt> - the subject of verbs to be conjugated
   # * <tt>:object</tt> - the object of verbs to be conjugated
@@ -38,7 +38,7 @@ class Grammar::GrammaticalContext
   def initialize(opts = {})
     @subject, @object, @audience, @person, @number = opts[:subject], opts[:object], opts[:audience], opts[:person], opts[:number]
   end
-  
+
   # Yields the result of <tt>merge(options)</tt>.
   #
   # Returns the result of the yield.
@@ -59,14 +59,14 @@ class Grammar::GrammaticalContext
     h[:number] = @number if @number
     h
   end
-  
+
   # Returns a new GrammaticalContext with the values in +self+ replaced
   # by those in +options+ (a GrammaticalContext or a Hash of the same
   # structure as for a +new+ Context).
   def merge(options)
     Grammar::GrammaticalContext.new(self.to_hash.merge(options.to_hash))
   end
-  
+
   def person
     # If none was specified at creation, try to calculate it from subject
     # and audience, but store the result in a separate variable so as not
@@ -74,7 +74,7 @@ class Grammar::GrammaticalContext
     return @person if @person
     @calculated_person ||= Grammar::Person::parse(@subject, @audience) if @subject && @audience
   end
-  
+
   def number
     # If none was specified at creation, try to calculate it from subject, but
     # store the result in a separate variable so as not
@@ -82,7 +82,7 @@ class Grammar::GrammaticalContext
     return @number if @number
     @calculated_number ||= Grammar::Number::parse(@subject) if @subject
   end
-  
+
   # Returns a String representing the subject of this context, replacing
   # with 'you' or 'yourself' depending on the audience.
   # Options:
@@ -94,7 +94,7 @@ class Grammar::GrammaticalContext
     options = { :capitalize => true, :case => Grammar::Case::SUBJECT }.merge(options)
     pronoun_or_noun(@subject, @audience, options)
   end
-  
+
   # Returns a String representing the object of this context, replacing
   # with 'you' or 'yourself' depending on the audience.
   # Options:
@@ -107,7 +107,7 @@ class Grammar::GrammaticalContext
     options = { :case => kase }.merge(options)
     pronoun_or_noun(@object, @audience, options)
   end
-  
+
   def conjugate(verb)
     missing = []
     missing << 'person' unless self.person
@@ -115,9 +115,9 @@ class Grammar::GrammaticalContext
     raise "Cannot conjugate; no #{missing.join(' or ')} specified" unless missing.empty?
     Grammar::Conjugator::conjugate(verb, self.person, self.number)
   end
-  
+
   def ==(other)
     other.kind_of?(GrammaticalContext) && self.to_hash == other.to_hash
   end
-  
+
 end

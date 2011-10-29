@@ -23,7 +23,7 @@ require 'grammar/ext'
 #     <% end -%>
 #   <% end -%>
 module Grammar::Ext::ActionView
-    
+
   # Set up and yield a GrammaticalContext to help generate inflected strings.
   #
   # If +options_or_context+ is a GrammaticalContext, uses that context.
@@ -39,8 +39,8 @@ module Grammar::Ext::ActionView
     else
       raise "I don't know how to use #{options_or_context} as a GrammaticalContext"
     end
-    
+
     concat(capture(context, &block), block.binding)
   end
-  
+
 end
