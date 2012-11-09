@@ -3,10 +3,10 @@ require 'grammar/conjugator'
 # Define conjugations in order of inverse priority.  Defaults at the top,
 # exceptions at the bottom.
 Grammar::Conjugator::conjugations do |c|
-  
+
   # default: do nothing
   c.conjugate(/^.*$/i) { |word, person, number| word }
-  
+
   # present tense, not ending in h: add 's' on 3rd singular
   c.conjugate(/^.*[^h]$/i) do |word, person, number|
     if person == Grammar::Person::THIRD && number == Grammar::Number::SINGULAR
@@ -15,7 +15,7 @@ Grammar::Conjugator::conjugations do |c|
       word
     end
   end
-  
+
   # present tense, ending in h: add 'es' on 3rd singular
   c.conjugate(/^.*[h]$/i) do |word, person, number|
     if person == Grammar::Person::THIRD && number == Grammar::Number::SINGULAR
@@ -24,7 +24,7 @@ Grammar::Conjugator::conjugations do |c|
       word
     end
   end
-  
+
   # present tense, ending in 'es': keep 's' only on 3rd singular
   c.conjugate(/^.*[^h]e?s$/i) do |word, person, number|
     if person == Grammar::Person::THIRD && number == Grammar::Number::SINGULAR
@@ -33,7 +33,7 @@ Grammar::Conjugator::conjugations do |c|
       word.gsub(/s$/, '')
     end
   end
-  
+
   # present tense, ending in 'hes': keep 'es' only on 3rd singular
   c.conjugate(/^.*hes$/i) do |word, person, number|
     if person == Grammar::Person::THIRD && number == Grammar::Number::SINGULAR
@@ -42,7 +42,7 @@ Grammar::Conjugator::conjugations do |c|
       word.gsub(/es$/, '')
     end
   end
-  
+
   # present tense, ending in 'ies': change 'ies' to 'y' on everything but 3rd singular
   c.conjugate(/^.*ies$/i) do |word, person, number|
     if person == Grammar::Person::THIRD && number == Grammar::Number::SINGULAR
@@ -60,7 +60,7 @@ Grammar::Conjugator::conjugations do |c|
       word
     end
   end
-  
+
   # past tense: all forms the same
   c.conjugate(/^.*ed$/i) { |word, person, number| word }
   c.do_not_conjugate(

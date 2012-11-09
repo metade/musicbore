@@ -12,7 +12,7 @@ and
   @user_to_display = @lucy
   Grammar::Pronoun.noun_or_pronoun(@user_to_display, @current_user)
   # => 'John'
-	
+
   @current_user = @lucy
   Grammar::Pronoun.pronoun_or_noun(@user_to_display, @current_user)
   # => 'you'

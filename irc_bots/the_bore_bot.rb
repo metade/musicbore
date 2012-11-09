@@ -18,7 +18,7 @@ IRCEvent.add_callback('privmsg') do |event|
       bot.send_message(event.channel, "say:#{fact_finder.bla_bla_bla}")
       # bot.send_message(event.channel, "say:#{fact_finder.name} is boring")
       sleep 5
-      
+
       next_bot = %w(connectionfinder placefinder hotnessfinder).rand
       if next_bot=='hotnessfinder'
         bot.send_message(event.channel, "#{next_bot}:#{fact_finder.name}")

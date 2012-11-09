@@ -21,7 +21,7 @@ class Query2SPARQL
     elsif query.ask?
       str << "ASK { #{where_clauses(query)} } "
     end
-    
+
     return str
   end
 end
@@ -35,38 +35,38 @@ class Bore
     Namespace.register(:bio, 'http://purl.org/vocab/bio/0.1/')
     Namespace.register(:rel, 'http://purl.org/vocab/relationship/')
     Namespace.register(:dbpedia, 'http://dbpedia.org/resource/')
-    
+
     $bbc = ConnectionPool.add_data_source(:type => :sparql, :url => 'http://api.talis.com/stores/bbc-backstage/services/sparql', :engine => :virtuoso)
     $bbc.enabled = true
-    
+
     $dbpedia = ConnectionPool.add_data_source(:type => :sparql, :url => 'http://dbpedia.org/sparql', :engine => :virtuoso)
     $musicbrainz = ConnectionPool.add_data_source(:type => :sparql, :url => 'http://dbtune.org/musicbrainz/sparql', :engine => :virtuoso)
   end
-  
+
   def bore(topic=nil)
     determine_fact_finder(topic)
   end
-  
+
   protected
-  
+
   def determine_fact_finder(topic)
     if topic =~ %r[http://www.bbc.co.uk/music/artists]
       ArtistFactFinder.new(topic)
     else
       if topic =~ %r[http://dbpedia.org/resource/]
         dbpedia_uri = topic
-      else 
+      else
         dbpedia_uri = "http://dbpedia.org/resource/#{topic.gsub(' ', '_')}"
       end
       artist_uri = ArtistFactFinder.artist_uri_for_dbpedia_uri(dbpedia_uri)
       if artist_uri
-        ArtistFactFinder.new(artist_uri) 
+        ArtistFactFinder.new(artist_uri)
       else
         DBPediaFactFinder.new(dbpedia_uri)
       end
     end
   end
-  
+
 end
 
 # debug code
