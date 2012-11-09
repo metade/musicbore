@@ -1,5 +1,5 @@
 module VerbsToTest
-  
+
   Conjugations = [
     ['am',          'are',        'is',           'are',        'are',        'are'],
     ['do',          'do',         'does',         'do',         'do',         'do'],
@@ -20,5 +20,5 @@ module VerbsToTest
     ['coached',     'coached',    'coached',      'coached',    'coached',    'coached'],
     ['flew',        'flew',       'flew',         'flew',       'flew',       'flew'],
   ]
-  
+
 end

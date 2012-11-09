@@ -1,12 +1,12 @@
 require 'grammar'
 
 module Grammar::Number
-  
+
   SINGULAR = :singular
   PLURAL = :plural
-  
+
   ALLOWED_VALUES = [SINGULAR, PLURAL]
-  
+
   # Converts +n_or_subject+ to <tt>:singular</tt> or <tt>:plural</tt>
   # as follows:
   # * if +n_or_subject+ is Nil, <tt>:plural</tt>
@@ -34,15 +34,15 @@ module Grammar::Number
       :singular
     end
   end
-  
+
   # Whether +n+ is a valid verb number.
   def self.valid_number?(n)
     ALLOWED_VALUES.include?(n)
   end
-  
+
   # Raises an ArgumentError unless +number+ is a valid verb number.
   def self.validate_number!(number)
     raise ArgumentError.new('#{number} is not a valid verb number') unless valid_number?(number)
   end
-  
+
 end

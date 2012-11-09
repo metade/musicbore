@@ -6,7 +6,7 @@ require 'grammar/case'
 
 module Grammar::Pronoun
   extend self
-  
+
   # Get the pronoun for +person+, +number+, +kase+, and +gender+.
   #
   # Raises ArgumentError if any of the arguments is invalid.
@@ -14,7 +14,7 @@ module Grammar::Pronoun
     Grammar::Person::validate_person!(person)
     Grammar::Number::validate_number!(number)
     Grammar::Case::validate_case!(kase)
-    
+
     case person
     when Grammar::Person::FIRST, Grammar::Person::SECOND
       load_pronouns[person][number][kase]
@@ -23,7 +23,7 @@ module Grammar::Pronoun
       load_pronouns[person][number][kase][gender]
     end
   end
-  
+
   # Return a pronoun or a noun, depending on the relationship of +noun+
   # to +audience+.  If they are the same, infers second person and uses
   # 'you'.  If they differ, uses <tt>noun.to_s</tt>
@@ -42,16 +42,16 @@ module Grammar::Pronoun
   #   gendered second-person pronouns).
   def pronoun_or_noun(noun, audience, options = {})
     return '' if noun.blank?
-    
+
     options = {
       :force_pronoun => false,
       :force_noun => false,
       :capitalize => false,
       :case => Grammar::Case::SUBJECT
     }.merge(options)
-    
+
     person = Grammar::Person::parse(noun, audience)
-    
+
     if options[:force_noun] || (person == Grammar::Person::THIRD && !options[:force_pronoun])
       result = noun.to_s
       result += "'s" if options[:case] == Grammar::Case::POSSESSIVE
@@ -64,16 +64,16 @@ module Grammar::Pronoun
     end
     result
   end
-  
+
   # Alias for +pronoun_or_noun+.
   def noun_or_pronoun(noun, audience, options = {})
     pronoun_or_noun(noun, audience, options)
   end
-  
+
   private
-  
+
   @@pronouns = nil
-  
+
   def self.load_pronouns
     return @@pronouns unless @@pronouns.nil?
     h = {
@@ -154,5 +154,5 @@ module Grammar::Pronoun
     }
     @@pronouns = h
   end
-  
+
 end

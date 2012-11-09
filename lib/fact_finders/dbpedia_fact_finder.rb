@@ -1,22 +1,22 @@
 class DBPediaFactFinder < FactFinder
   attr_reader :resource
-  
+
   def initialize(dbpedia_uri)
     @resource = DBPEDIA::Resource.new(dbpedia_uri)
   end
-  
+
   def name
     return @name if @name
     sparql = <<-eos
-      SELECT ?label WHERE { 
-        <#{@resource.uri}> rdfs:label ?label . 
+      SELECT ?label WHERE {
+        <#{@resource.uri}> rdfs:label ?label .
         FILTER (langMatches(lang(?label), "en"))
       }
     eos
     results = $dbpedia.query(sparql).flatten
     @name = results.empty? ? nil : results.first
   end
-  
+
   def list_statements
     statements = []
     sparql_1 = <<-eos
@@ -33,15 +33,15 @@ class DBPediaFactFinder < FactFinder
       }
     eos
     results = $dbpedia.query(sparql_1) + $dbpedia.query(sparql_2)
-    
+
     results.each do |result|
       p result
     end
-    
+
     # @name = results.empty? ? nil : results.first
     []
   end
-  
+
   def dbpedia_query(&block)
     $dbpedia.enabled = true
     $bbc.enabled = false
@@ -50,7 +50,7 @@ class DBPediaFactFinder < FactFinder
     $bbc.enabled = true
     value
   end
-  
-  
-  
+
+
+
 end

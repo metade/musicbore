@@ -4,13 +4,13 @@ Gem::Specification.new do |s|
   s.date = '2008-06-18'
   s.summary = 'Verb and pronoun inflection.'
   s.description = "Makes it easy to get the right form of the verb or use 'you' correctly in your View."
- 
+
   s.specification_version = 2 if s.respond_to? :specification_version=
   s.required_rubygems_version = Gem::Requirement.new('>= 0') if s.respond_to? :required_rubygems_version=
-  
+
   s.authors = ['James Rosen']
   s.email = 'james.a.rosen@gmail.com'
-  
+
   s.extra_rdoc_files = ['init.rb', 'rails/init.rb', 'README.txt', 'License.txt']
   s.files = [
     '.gitignore', 'doc', 'doc/.gitignore', 'doc/jamis_template.rb',
@@ -29,7 +29,7 @@ Gem::Specification.new do |s|
     'test/pronoun_test.rb', 'test/string_ext_test.rb', 'test/test_helper.rb',
     'test/verb_test.rb'
   ]
-  
+
   s.has_rdoc = true
   s.homepage = 'http://github.com/gcnovus/grammar'
   s.rdoc_options = ['--line-numbers', '--inline-source', '--title', 'Grammar RDoc', '--charset', 'utf-8']

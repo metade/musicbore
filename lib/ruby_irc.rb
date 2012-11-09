@@ -19,7 +19,7 @@ class IRCEvent
      end
 
      if @event_type != 'ping'
-       @from    = @stats[0] 
+       @from    = @stats[0]
        @user    = IRCUser.create_user(@from)
      end
      # FIXME: this list would probably be more accurate to exclude commands than to include them

@@ -20,26 +20,26 @@ require 'grammar/ext'
 #       Grammar::GrammaticalContext.new(:subject => @requested_user, :audience => @current_user)
 #     end
 #   end
-# 
+#
 module Grammar::Ext::ActionController
-  
+
   def self.included(base)
     base.send :include, Grammar::Ext::ActionController::InstanceMethods
     base.helper_method :grammatical_context
   end
-  
+
   module InstanceMethods
-    
+
     def grammatical_context
       @grammatical_context ||= Grammar::GrammaticalContext.new
     end
-    
+
     private
-    
+
     def grammatical_context=(context)
       @grammatical_context = context
     end
-    
+
   end
-  
+
 end

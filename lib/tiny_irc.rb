@@ -14,7 +14,7 @@ class IRC
     def send(s)
         # Send a message to the irc server and print it to the screen
         puts "--> #{s}"
-        @irc.send "#{s}\n", 0 
+        @irc.send "#{s}\n", 0
     end
     def connect()
         # Connect to the IRC server
